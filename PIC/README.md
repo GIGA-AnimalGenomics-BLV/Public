@@ -51,7 +51,7 @@ Before mapping an index need to be created. Three FASTA files have to be provide
 	* LTRs sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
 	* Provide only the sequences starting from the primer 'start' until the LTR's end.
  
-To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](https://www.ensembl.org/info/data/ftp/index.html).
+To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/).
 
 
 #### 1. Bowtie2 viral-host genome
@@ -252,7 +252,7 @@ R2_LTR5="R2_LTR5Found_linkerFound_Host.trimmed.fastq_pairs_R2.fastq"
 
 #### 4.1.1. Extract best quality reads (i.e. proper pairs) and separated first/second strands
 
-Align onto host genome with viral genome as separated chromosome. Allow -N for one mismatch maximum in the initial seed sequence. Although only primary alignments are reported reads mapping to >11 positions are excluded (-k 10).  
+Align onto host genome with viral genome as separated chromosome. Allow -N for one mismatch maximum in the initial seed sequence detection. No-mixed option make sure that only pairs can be reported.
 
 ```
 bowtie2 -p 2 --very-sensitive -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_bowtie2_BEST.sam
@@ -272,6 +272,8 @@ $samtools index LTR5_candidateIS_bowtie2_BEST.sorted.bam
 ```
 
 #### 4.2.1. Extract alternative position of each reads
+
+Map the reads and extract the up-to 11 first mapping positions of every reads. Those alternative positions will be used to detected IS in low-complexity regions.
 
 ```
 bowtie2 -p 2 --very-sensitive -k 11 -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_ALTERN_bowtie2.sam

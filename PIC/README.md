@@ -48,8 +48,8 @@ Before mapping an index need to be created. Three FASTA files have to be provide
 * Complete Viral Sequence
 * Host Genome
 * LTR sequences 
- * LTRs sequences should comprised the "chromosomes": >LTR3 and >LTR5
- * Provide only the sequences starting from the primer 'start' until the LTR's end.
+	* LTRs sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
+	* Provide only the sequences starting from the primer 'start' until the LTR's end.
  
 To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](https://www.ensembl.org/info/data/ftp/index.html).
 

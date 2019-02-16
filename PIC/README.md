@@ -51,8 +51,7 @@ Before mapping an index need to be created. Three FASTA files have to be provide
 	* LTRs sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
 	* Provide only the sequences starting from the primer 'start' until the LTR's end.
  
-To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/).
-
+To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/)
 
 #### 1. Bowtie2 viral-host genome
 
@@ -334,4 +333,4 @@ mapqSTRINGENT = args[10]
 )
 ```
 
-PIC R wrapper function for clonality analysis. To better understand what is achieved behind the hood, please refer yourself to PIC library [PIC R library](https://github.com/GIGA-AnimalGenomics-BLV/PIC)
+PIC R wrapper function for clonality analysis. To better understand what is achieved behind the hood, please refer yourself to PIC library [PIC R library]() which will be later available.

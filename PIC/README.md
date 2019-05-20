@@ -9,7 +9,7 @@
 * samtools >= 0.1.19
 * bbmap
 * R >= 3.2.2
-  * PIC (2.0)
+  * PIC (1.3)
   * dplyr (>= 0.7.6)
   * ggplot2 (>= 2.2.1)
   * tibble (>= 1.4.2)

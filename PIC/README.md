@@ -117,8 +117,8 @@ In order to speed-up detection of linker sequences, short-read aligner should be
 mkdir linkerBowtie
 cd linkerBowtie
 
-echo >linker_$linker >> linker.fa
-echo $linker >> linker.fa
+echo ">linker_$linker" >> linker.fa
+echo "$linker" >> linker.fa
 
 bowtie-build -q linker.fa linker
 

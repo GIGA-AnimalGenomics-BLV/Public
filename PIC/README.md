@@ -224,7 +224,7 @@ cutadapt --quiet -m 10 -a $LTR5reverse_firstbp R2_LTR5Found_linkerFound_Host.fas
 Finally remaining of linker sequence are trimmed:
 
 ```
-revLinker=$(echo $link | rev)
+revLinker=$(echo $linker | rev)
 revCompLinker=$(echo $revLinker | tr "[ATGCatgcNn]" "[TACGtacgNn]")
 
 cutadapt --quiet -m 10 -a $revLinker R1_LTR3Found_linkerFound_Host.trimmed.fastq | cutadapt -m 10 --quiet -a $revCompLinker - > R1_LTR3Found_linkerFound_Host.trimmed2.fastq
@@ -234,7 +234,7 @@ cutadapt --quiet -m 10 -a $revLinker R1_LTR5Found_linkerFound_Host.trimmed.fastq
 After trimming some reads might have too short R1 or an absence of mate. Pairs are resynchronised: 
 
 ```
-python resynchronizePairs.pu R1_LTR3Found_linkerFound_Host.trimmed2.fastq R2_LTR3Found_linkerFound_Host.trimmed.fastq
+python resynchronizePairs.py R1_LTR3Found_linkerFound_Host.trimmed2.fastq R2_LTR3Found_linkerFound_Host.trimmed.fastq
 python resynchronizePairs.py R1_LTR5Found_linkerFound_Host.trimmed2.fastq R2_LTR5Found_linkerFound_Host.trimmed.fastq
 ```
 

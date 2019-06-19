@@ -200,25 +200,25 @@ On R1:
 ```
 # Specify LTR sequences to remove
 LTR3forward_firstBp=$LTR3sequence_firstbp	# [TTAGTACACA]
-LTR3Complement_firstBp=$(echo $LTR3forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [AATCATGTG]
-LTR5reverse_firstBp=`echo $LTR5sequence_firstbp | rev`	# [TGACAATGAC]
-LTR5reverseComplement_firstBp=$(echo $LTR5reverse_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [GTCATTGTCA]
+LTR3Complement_firstBp=$(echo $LTR3sequence_firstbp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [AATCATGTG]
+LTR5forward_firstBp=$LTR5sequence_firstbp # [TGACAATGAC]
+LTR5Complement_firstBp=$(echo $LTR5forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [GTCATTGTCA]
 
 cutadapt --quiet -n 2 -m 10 -g $LTR3forward_firstBp R1_LTR3Found_linkerFound_Host.fastq | cutadapt --quiet -n 2 -m 10 -g $LTR3Complement_firstBp - > R1_LTR3Found_linkerFound_Host.trimmed.fastq
-cutadapt --quiet -n 2 -m 10 -g $LTR5reverse_firstBp R1_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -n 2 -m 10 -g $LTR5reverseComplement_firstBp - > R1_LTR5Found_linkerFound_Host.trimmed.fastq
+cutadapt --quiet -n 2 -m 10 -g $LTR5forward_firstBp R1_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -n 2 -m 10 -g $LTR5Complement_firstBp - > R1_LTR5Found_linkerFound_Host.trimmed.fastq
 ```
 
 On R2:
 
 ```
 # Specify LTR sequences to remove
-LTR3forward_firstBp=$LTR3sequence_firstbp	# [TGTGTACTAA]
-LTR3reverse_firstbp=`echo $LTR3sequence_firstbp | rev`	# [ACACATGATT]
-LTR5reverse_firstbp=`echo $LTR5sequence_firstbp | rev`	# [ACTGTTACTG]
+LTR3Complement_firstBp=`$(echo $LTR3sequence_firstbp | tr "[ATGCatgcNn]" "[TACGtacgNn]")`	# [ACACATGATT]
+LTR3reverseComplement_firstbp=`$(echo $LTR3Complement_firstBp | rev)`	# [TGTGTACTAA]
+LTR5Complement_firstbp=`$(echo $LTR5forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")`	# [ACTGTTACTG]
 LTR5forward_firstBp=$LTR5sequence_firstbp	# [TGACAATGAC]
 
-cutadapt --quiet -m 10 -a $LTR3reverse_firstbp R2_LTR3Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR3forward_firstBp - > R2_LTR3Found_linkerFound_Host.trimmed.fastq
-cutadapt --quiet -m 10 -a $LTR5reverse_firstbp R2_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR5forward_firstBp - > R2_LTR5Found_linkerFound_Host.trimmed.fastq
+cutadapt --quiet -m 10 -a $LTR3Complement_firstBp R2_LTR3Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR3reverseComplement_firstbp - > R2_LTR3Found_linkerFound_Host.trimmed.fastq
+cutadapt --quiet -m 10 -a $LTR5Complement_firstbp R2_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR5forward_firstBp - > R2_LTR5Found_linkerFound_Host.trimmed.fastq
 ```
 
 Finally remaining of linker sequence are trimmed:

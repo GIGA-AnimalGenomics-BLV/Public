@@ -2,23 +2,23 @@
 
 ## Prerequsits 
 
-* bowtie >= 1.1.2
-* bowtie2 >= 2.2.9
-* cutadapt >= 1.7.1
-* fastx 0.0.13
-* samtools >= 0.1.19
+* bowtie (≥1.1.2)
+* bowtie2 (≥2.2.9)
+* cutadapt (≥1.7.1)
+* fastx (≥0.0.13)
+* samtools (≥0.1.19)
 * bbmap
-* R >= 3.2.2
-  * PIC (1.3)
-  * dplyr (>= 0.7.6)
-  * ggplot2 (>= 2.2.1)
-  * tibble (>= 1.4.2)
-  * readr (>= 1.1.1)
-  * WriteXLS (>= 4.0.0)
-  * ShortRead (>= 1.3)
-  * stringr (>= 1.3)
-  * tidyr (>= 0.8)
-  * GenomicRanges (>= 1.32.2)
+* R ≥ 3.2.2
+  * PIC (1.0)
+  * dplyr (≥0.7.6)
+  * ggplot2 (≥2.2.1)
+  * tibble (≥1.4.2)
+  * readr (≥1.1.1)
+  * WriteXLS (≥4.0.0)
+  * ShortRead (≥1.3)
+  * stringr (≥1.3)
+  * tidyr (≥0.8)
+  * GenomicRanges (≥1.32.2)
 
 Versions specified here have been tested succesfully. 
 
@@ -26,32 +26,26 @@ Although the pipeline is relatively light in memory, running it with less than 1
 
 ## Introduction
 
-This pipeline is dedicated to the analysis of integration site "clonality" data as described in Rosewick *et al*, 2017. However it can easely repurpose for any other ligation-mediated clonality methods.
-
-Described pipeline has been now cited in:
-
-* Rosewick *et al*, **Nature Communications**, 2017
-* Artesi *et al*, **Leukemia**, 2017
-* Hahaut *et al*, **Biorxiv**, 2018
-
-A test dataset can be found in: [test data online](https://)
+This pipeline is dedicated to the analysis of integration site "clonality" data as described in Rosewick *et al*, 2017 or Artesi *et al*, 2017. However it can easely repurpose for any other ligation-mediated clonality methods.
 
 This example is intended to work on HTLV proviruses. Some parameters (index, LTR sequences, ...) have to be adapated for BLV or HIV.
 
 
-## Pipeline
+## Introduction
+
+This example is intended to work on HTLV proviruses. Some parameters (index, LTR sequences, ...) have to be adapated for BLV or HIV.
 
 ### Indexes
 
 Before mapping an index need to be created. Three FASTA files have to be provided:
 
-* Complete Viral Sequence
-* Host Genome
+* Complete viral sequence
+* Host genome
 * LTR sequences 
 	* LTRs sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
 	* Provide only the sequences starting from the primer 'start' until the LTR's end.
  
-To annotate final results a GTF file downloaded from ENSEMBL is also required [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/)
+To annotate the final results a GTF file downloaded from ENSEMBL is also required (i.e., [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/))
 
 #### 1. Bowtie2 viral-host genome
 

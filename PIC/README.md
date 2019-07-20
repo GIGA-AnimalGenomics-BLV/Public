@@ -34,11 +34,6 @@ This pipeline is dedicated to the analysis of integration site "clonality" data 
 
 This example is intended to work on HTLV proviruses. Some parameters (index, LTR sequences, ...) have to be adapated for BLV or HIV.
 
-
-## Introduction
-
-This example is intended to work on HTLV proviruses. Some parameters (index, LTR sequences, ...) have to be adapated for BLV or HIV.
-
 ### Indexes
 
 Before mapping an index need to be created. Three FASTA files have to be provided:

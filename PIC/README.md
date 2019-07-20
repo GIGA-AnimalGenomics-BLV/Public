@@ -9,7 +9,7 @@
 * [samtools](http://samtools.sourceforge.net/) (≥0.1.19)
 
 * [R](https://www.r-project.org/) ≥ 3.2.2
-  * PIC (1.0)
+  * PIC (1.3)
   * dplyr (≥0.7.6)
   * ggplot2 (≥2.2.1)
   * tibble (≥1.4.2)
@@ -19,14 +19,15 @@
   * stringr (≥1.3)
   * tidyr (≥0.8)
   * GenomicRanges (≥1.32.2)
+  * Rsamtools (≥1.34.1) 
 
 * Scripts contained in the "tools" folder 
   * filterbyname.sh (from the splice-aware global aligner [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/))
   * resynchronizePaired.py
 
-Versions specified here have been tested succesfully. 
+Specified versions have been tested succesfully. Installation guidelines can be found in INSTALL. 
 
-Although the pipeline is relatively light in memory, running it with less than 12 Gb of RAM is not recommended. 
+Although the pipeline is relatively light in memory, running it with less than 16 Gb of RAM is not recommended. 
 
 ## Introduction
 

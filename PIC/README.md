@@ -2,13 +2,13 @@
 
 ## Prerequsits 
 
-* bowtie (≥1.1.2)
-* bowtie2 (≥2.2.9)
-* cutadapt (≥1.7.1)
-* fastx (≥0.0.13)
-* samtools (≥0.1.19)
-* bbmap
-* R ≥ 3.2.2
+* [bowtie](http://bowtie-bio.sourceforge.net/tutorial.shtml) (≥1.1.2)
+* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) (≥2.2.9)
+* [cutadapt](https://cutadapt.readthedocs.io/en/stable/installation.html) (≥1.7.1)
+* [fastx](http://hannonlab.cshl.edu/fastx_toolkit/) (≥0.0.13)
+* [samtools](http://samtools.sourceforge.net/) (≥0.1.19)
+
+* [R](https://www.r-project.org/) ≥ 3.2.2
   * PIC (1.0)
   * dplyr (≥0.7.6)
   * ggplot2 (≥2.2.1)
@@ -19,6 +19,10 @@
   * stringr (≥1.3)
   * tidyr (≥0.8)
   * GenomicRanges (≥1.32.2)
+
+* Scripts contained in the "tools" folder 
+  * filterbyname.sh (from the splice-aware global aligner [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/))
+  * resynchronizePaired.py
 
 Versions specified here have been tested succesfully. 
 
@@ -47,7 +51,7 @@ Before mapping an index need to be created. Three FASTA files have to be provide
  
 To annotate the final results a GTF file downloaded from ENSEMBL is also required (i.e., [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/))
 
-#### 1. Bowtie2 viral-host genome
+#### 1. Create bowtie2 viral-host genome
 
 ```
 viral_genome="path/to/viral/genome.fasta"
@@ -58,7 +62,7 @@ cat $viral_genome $host_genome > viral_host.fa
 bowtie2-build viral_host.fa viral_host 
 ```
 
-#### 2. Bowtie2 LTR sequences
+#### 2. Create bowtie2 LTR sequences
 
 ```
 LTR_sequences="path/to/LTR.fa"
@@ -66,7 +70,7 @@ LTR_sequences="path/to/LTR.fa"
 bowtie2-build $LTR_sequences LTR_sequence 
 ```
 
-#### 3. Annotation GTF
+#### 3. Prepare the annotation GTF
 
 ```
 GTF="path/to/ensembl_host.gtf.gz"
@@ -78,17 +82,15 @@ zcat $GTF | grep ensembl[[:space:]]gene | awk -F '\t' '{print $1"\t"$4"\t"$5"\t"
 paste -d '\t' geneInfos/genePositions.txt geneInfos/geneID.txt geneInfos/geneName.txt | sort > geneInfos/geneInfos.sorted.txt
 ```
 
-### Variable definition
-
-Several information are required to start working on raw data: 
+#### 4. Define the following variables
 
 ```
 # HTLV:
 
-LTR5len=36 # Length of the LTR5 sequence, starting from the LTR to the primer end
-LTR3len=45 # Length of the LTR3 sequence, starting from the primer to the LTR end
-virus="HTLV_ATK" # Name given to the indexed viral sequence
-linkLen=22 # Length of the linker sequence
+LTR5len=36		# Length of the LTR5 sequence, starting from the LTR to the end of the primer
+LTR3len=45		# Length of the LTR3 sequence, starting from the primer start to the LTR end
+virus="HTLV_ATK"	# Name given to the indexed viral sequence
+linkLen=22		# Length of the linker sequence
 
 sampleName="mySample"
 r1="path/to/raw/file/r1.fastq"
@@ -99,9 +101,11 @@ bowtie2_virusHost_index="path/to/bowtie2/virusHost/index/prefix"
 bowtie2_LTR_index="path/to/bowtie2/LTR/index/prefix"
 geneBedFile="path/to/geneInfos.sorted.txt"
 
-LTR3sequence_firstbp="TTAGTACACA"
-LTR5sequence_firstbp="TGACAATGAC"
+LTR3sequence_firstbp="TTAGTACACA"	# To remove residual sequences
+LTR5sequence_firstbp="TGACAATGAC"	
 ```
+
+## PROCESS THE DATA
 
 ### 1. Select reads harboring linker sequence
 
@@ -137,9 +141,9 @@ Finally only the reads with the right linker are selected
 bbmap/filterbyname.sh in=$r1 in2=$r2 out=R1_linkerFound.fastq out2=R2_linkerFound.fastq names=readID_linkerFound.txt include=t overwrite=t
 ```
 
-### 2. Select reads harboring LTR sequence
+### 2. Select reads harboring an LTR sequence
 
-LTR sequence is located in R1, after complexity sequence (8bp). Length should be provided as argument (LTR3len or LTR5len)
+LTR sequence is located in R1, after the complexity sequence (8 bp). LTR Length should be provided as argument (LTR3len or LTR5len)
 
 ```
 fastx_trimmer -Q33 -f 8 -l $LTR3len -i R1_linkerFound.fastq -o R1_virusLTR3_edge.fastq
@@ -147,6 +151,7 @@ fastx_trimmer -Q33 -f 8 -l $LTR5len -i R1_linkerFound.fastq -o R1_virusLTR5_edge
 ```
 
 Align onto the proviral sequence (LTR edge only) and select IDs from reads mapping onto it with the following arguments:
+
 ```
 bowtie2 -L 14 -p 2 -N 1 -x $bowtie2_LTR_index -U R1_virusLTR3_edge.fastq | grep "LTR3" | awk '{print $1}' | grep -v "^@"  > readID_LTR3Found.txt
 bowtie2 -L 14 -p 2 -N 1 -x $bowtie2_LTR_index -U R1_virusLTR5_edge.fastq | grep "LTR5" | awk '{print $1}' | grep -v "^@"  > readID_LTR5Found.txt
@@ -171,7 +176,7 @@ Go from a 0-base to 1-base system:
 
 ### 3. Trim the reads
 
-In order to get a better mapping efficiency alignment onto host genome is performed after trimming of LTR, linker and random tags.
+In order to get a better mapping efficiency, alignment onto host genome is performed after trimming of the LTR, linker and random tags.
 
 First start by removing the linker sequence from R2:
 
@@ -187,16 +192,16 @@ fastx_trimmer -Q33 -f $LTR3len -i R1_LTR3Found_linkerFound.fastq -o R1_LTR3Found
 fastx_trimmer -Q33 -f $LTR5len -i R1_LTR5Found_linkerFound.fastq -o R1_LTR5Found_linkerFound_Host.fastq
 ```
 
-Another important source of noise in clonality libraries is the overlap between R1-R2 reads. This overlap creates softclipping in R1 due to the sequencing of R2-linker and in R2 due to sequencing of R1-LTR. To remove them cutadapt is used. Here HTLV ATK is taken as example.
+Another important source of noise in clonality libraries is the overlap between R1-R2 reads. This overlap creates soft-clipping in R1 due to the sequencing of R2-linker and in R2 due to sequencing of R1-LTR. To remove them cutadapt is used.
 
 On R1:
 
 ```
 # Specify LTR sequences to remove
-LTR3forward_firstBp=$LTR3sequence_firstbp	# [TTAGTACACA]
-LTR3Complement_firstBp=$(echo $LTR3sequence_firstbp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [AATCATGTG]
-LTR5forward_firstBp=$LTR5sequence_firstbp # [TGACAATGAC]
-LTR5Complement_firstBp=$(echo $LTR5forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")	# [GTCATTGTCA]
+LTR3forward_firstBp=$LTR3sequence_firstbp							# [TTAGTACACA]
+LTR3Complement_firstBp=$(echo $LTR3sequence_firstbp | tr "[ATGCatgcNn]" "[TACGtacgNn]")		# [AATCATGTG]
+LTR5forward_firstBp=$LTR5sequence_firstbp 							# [TGACAATGAC]
+LTR5Complement_firstBp=$(echo $LTR5forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")		# [GTCATTGTCA]
 
 cutadapt --quiet -n 2 -m 10 -g $LTR3forward_firstBp R1_LTR3Found_linkerFound_Host.fastq | cutadapt --quiet -n 2 -m 10 -g $LTR3Complement_firstBp - > R1_LTR3Found_linkerFound_Host.trimmed.fastq
 cutadapt --quiet -n 2 -m 10 -g $LTR5forward_firstBp R1_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -n 2 -m 10 -g $LTR5Complement_firstBp - > R1_LTR5Found_linkerFound_Host.trimmed.fastq
@@ -207,9 +212,9 @@ On R2:
 ```
 # Specify LTR sequences to remove
 LTR3Complement_firstBp=`$(echo $LTR3sequence_firstbp | tr "[ATGCatgcNn]" "[TACGtacgNn]")`	# [ACACATGATT]
-LTR3reverseComplement_firstbp=`$(echo $LTR3Complement_firstBp | rev)`	# [TGTGTACTAA]
+LTR3reverseComplement_firstbp=`$(echo $LTR3Complement_firstBp | rev)`				# [TGTGTACTAA]
 LTR5Complement_firstbp=`$(echo $LTR5forward_firstBp | tr "[ATGCatgcNn]" "[TACGtacgNn]")`	# [ACTGTTACTG]
-LTR5forward_firstBp=$LTR5sequence_firstbp	# [TGACAATGAC]
+LTR5forward_firstBp=$LTR5sequence_firstbp							# [TGACAATGAC]
 
 cutadapt --quiet -m 10 -a $LTR3Complement_firstBp R2_LTR3Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR3reverseComplement_firstbp - > R2_LTR3Found_linkerFound_Host.trimmed.fastq
 cutadapt --quiet -m 10 -a $LTR5Complement_firstbp R2_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR5forward_firstBp - > R2_LTR5Found_linkerFound_Host.trimmed.fastq
@@ -241,11 +246,11 @@ R1_LTR5="R1_LTR5Found_linkerFound_Host.trimmed2.fastq_pairs_R1.fastq"
 R2_LTR5="R2_LTR5Found_linkerFound_Host.trimmed.fastq_pairs_R2.fastq"
 ```
 
-### 4. Align onto host genome
+### 4. Align trimmed reads onto host genome
 
 #### 4.1.1. Extract best quality reads (i.e. proper pairs) and separated first/second strands
 
-Align onto host genome with viral genome as separated chromosome. Allow -N for one mismatch maximum in the initial seed sequence detection. No-mixed option make sure that only pairs can be reported.
+Align reads onto the host genome + viral genome as separated chromosome. Allow -N for one mismatch maximum in the initial seed sequence detection. No-mixed option make sure that only reads mapped in pairs are be reported.
 
 ```
 bowtie2 -p 2 --very-sensitive -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_bowtie2_BEST.sam
@@ -266,7 +271,7 @@ $samtools index LTR5_candidateIS_bowtie2_BEST.sorted.bam
 
 #### 4.2.1. Extract alternative position of each reads
 
-Map the reads and extract the up-to 11 first mapping positions of every reads. Those alternative positions will be used to detected IS in low-complexity regions.
+Extract the 11 best mapping positions of every reads (up-to). Those alternative positions will be used to detected IS in low-complexity regions (RECALL).
 
 ```
 bowtie2 -p 2 --very-sensitive -k 11 -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_ALTERN_bowtie2.sam
@@ -285,7 +290,7 @@ $samtools sort LTR5_candidateIS_bowtie2_ALTERN.bam LTR5_candidateIS_bowtie2_ALTE
 $samtools index LTR5_candidateIS_bowtie2_ALTERN.sorted.bam
 ```
 
-### 5. Extract reads mapping to the provirus (for quantification purposes):
+### 5. Extract reads mapping to the provirus (for quantification purpose only):
 
 ```
 samtools view -F 0x40 -q 30 -S LTR3_candidateIS_bowtie2.sam | awk -v vir=$virus '{if($3 == vir){print $0}}' > LTR3_pureViralReads_bowtie2.sam
@@ -294,7 +299,7 @@ samtools view -F 0x40 -q 30 -S LTR5_candidateIS_bowtie2.sam | awk -v vir=$virus 
 
 ### 6. Extract random tag sequence from the R2 raw data
 
-R2 random tag is located at the first 8bp of R2 reads
+R2 random tag is located at the first 8 bp of R2 reads
 
 ```
 fastx_trimmer -Q33 -l 8 -i R2.fastq | fastq_to_fasta -Q33 | fasta_formatter -t | awk '{print $1"\t"$3}' > R2_randomTag.txt
@@ -306,7 +311,7 @@ fastx_trimmer -Q33 -l 8 -i R2.fastq | fastq_to_fasta -Q33 | fasta_formatter -t |
 Rscript run_PIC.R "LTR3_candidateIS_bowtie2_BEST.sorted.bam" "LTR5_candidateIS_bowtie2_BEST.sorted.bam" "LTR3_candidateIS_bowtie2_ALTERN.sorted.bam" "LTR5_candidateIS_bowtie2_ALTERN.sorted.bam" "R2_randomTag.txt" $name $geneBedFile "R1.fastq" $virus 30
 ```
 
-run_PIC.R simply contains the following arguments
+The run_PIC.R script should contain the following arguments:
 
 ```
 library(PIC)
@@ -327,4 +332,4 @@ mapqSTRINGENT = args[10]
 )
 ```
 
-PIC R wrapper function for clonality analysis. To better understand what is achieved behind the hood, please refer yourself to PIC library [PIC R library]() which will be later available.
+PIC() is the wrapper function of our clonality analysis.

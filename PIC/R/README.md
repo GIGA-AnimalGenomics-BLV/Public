@@ -137,7 +137,7 @@ Four outputs are created with ``PIC()``
 |``sampleName.args``-SIMPLIFIED_mergedIS.txt|Simplified table containing the merged LTRs results. Only the STRINGENT columns are reported|
 |``sampleName.args``-statistics.txt|Run statistics|
 
-Description of each field is contained in this github at [result field description]()
+Description of each field and an example is contained in this github at [result field description](https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PIC/R/OutputFields.description.xlsx)
  
  
 ---
@@ -182,16 +182,16 @@ Fine-tuning of the entropy parameters is extremely important and will depend on 
 3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundances are computed separately
 4. Based on the filtering options the IS are separated in 5 CATEGORIES. 
 	* We typically use this two sets of parameters:
-		* *ENTROPY_RECURRENCE:* entropy < 0.85 (``filt.recurrence``)
-		* *ENTROPY_ABUNDANCE:* entropy < 0.85 (``filt.abundance``) & at least one animal needs to have > 5 reads supporting the IS (``minReadMax``)
-		* *NON-SPECIFIC:* the IS is detected in > 6% of the samples (``nonSpecific``)
-		* *UNIQUE:* IS only detected in one individual
-		* *DUBIOUS:* All the other IS
+		* **ENTROPY_RECURRENCE:** entropy < 0.85 (``filt.recurrence``)
+		* **ENTROPY_ABUNDANCE:** entropy < 0.85 (``filt.abundance``) & at least one animal needs to have > 5 reads supporting the IS (``minReadMax``)
+		* **NON-SPECIFIC:** the IS is detected in > 6% of the samples (``nonSpecific``)
+		* **UNIQUE:** IS only detected in one individual
+		* **DUBIOUS:** All the other IS
 5. The TRUE owner of each IS is assigned.
-	* *NON-SPECIFIC & DUBIOUS:* NA
-	* *UNIQUE:* Only one
-	* *ENTROPY_RECURRENCE:* The owner is the individual with the highest recurrence 
-	* *ENTROPY_ABUNDANCE:* The owner is the individual with the maximal abundance
+	* **NON-SPECIFIC & DUBIOUS:** NA
+	* **UNIQUE:** Only one
+	* **ENTROPY_RECURRENCE:** The owner is the individual with the highest recurrence 
+	* **ENTROPY_ABUNDANCE:** The owner is the individual with the maximal abundance
 	
 	
 The function reports either the provided IS table with CATEGORY annotations as a new column (``report = FALSE``) or an intermediate table containing the recurrence, maximal abundances, shannon entropies, *etc* for each IS in each individual. This table can used to determine the right entropy parameters.

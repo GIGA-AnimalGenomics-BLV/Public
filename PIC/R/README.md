@@ -2,19 +2,21 @@
 
 ## INTRODUCTION
 
-This package contains the PIC() wrapper function which takes the following arguments:
+This package contains the ``PIC()`` wrapper function which takes the following arguments:
 
-LTR3.args		**character**	# path/to/file.bam reads supporting LTR3 IS (STRINGENT)
-LTR5.args		**character**	# path/to/file.bam reads supporting LTR5 IS (STRINGENT)
-LTR3.altern		**character**	# path/to/file.bam reads supporting LTR3 IS (ALL)
-LTR5.altern		**character**	# path/to/file.bam reads supporting LTR5 IS (ALL)
-randomTag.args  	**character**	# path/to/file.txt random tag of each reads
-sampleName.args		**character**	# sample_name
-geneBedFile.args 	**character**	# path/to/annotation.bed
-rawFASTQ.args 		**character**	# path/to/file.fastq R1 fastq ID, for statistics purpose
-winRecall 		**numeric**	# size of the RECALL window
-virus.args 		**character**	# viral_chromosome_name
-mapqSTRINGENT 		**numeric**	# MAPQ of stringent reads
+|VARIABLE|TYPE|DEFINITION|
+|:-:|---|---|
+|LTR3.args|**character**|path/to/file.bam reads supporting LTR3 IS (STRINGENT)
+|LTR5.args|**character**|path/to/file.bam reads supporting LTR5 IS (STRINGENT)
+|LTR3.altern|**character**|path/to/file.bam reads supporting LTR3 IS (ALL)
+|LTR5.altern|**character**|path/to/file.bam reads supporting LTR5 IS (ALL)
+|randomTag.args|**character**|path/to/file.txt random tag of each reads
+|sampleName.args|**character**|sample_name
+|geneBedFile.args|**character**|path/to/annotation.bed
+|rawFASTQ.args|**character**|path/to/file.fastq R1 fastq ID, for statistics purpose
+|winRecall|**numeric**|size of the RECALL window
+|virus.args|**character**|viral_chromosome_name
+|mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
 STRINGENT: Only the best mapping position of each read
 ALL: Report up to 11 mapping position per read

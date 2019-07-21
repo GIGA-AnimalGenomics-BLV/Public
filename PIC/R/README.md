@@ -18,11 +18,40 @@ This package contains the ``PIC()`` wrapper function which takes the following a
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-**STRINGENT:** Only the best mapping position of each read, **ALL:** Report up to 11 mapping position per read
+Two types of mapping are needed:
 
-## PIC() FUNCTION
+* **STRINGENT:** Only the best mapping position of each read (PRIMARY)
+* **ALL:** Report up to 11 mapping position per read
 
-LTR3 and LTR5 are first treated separately with the following process:
+Reads supporting the 5'LTR or 3'LTR are processed separately. 
+ 
+### 1. ``loadClonalityData()``
+
+**GOALS:** Load the BAM file. 
+**RETURNS:** List of R1 reads, R2 reads and viral reads (mapping only to the virus)
+
+|read_id|flag|chr|pos|mapq|cigar|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|
+|:-:|---|---|---|---|---|---|---|---|---|---|---|---|
+|M00991:68:000000000-AU82H:1:1105:21631:18279|147|chr10|2656307|1|12M|-|-20|NA|TRUE|FALSE|0|1|
+|M00991:68:000000000-AU82H:1:1101:18425:23433|163|chr10|10614734|1|13M|+|-20|NA|TRUE|FALSE|0|1|
+|M00991:68:000000000-AU82H:1:1110:17539:21149|163|chr10|11813034|33|20M|+|-20|NA|TRUE|TRUE|0|1|
+
+In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf), reads are flagged with:
+
+* isPRIMARY: Is it a primary alignment ?
+* isSTRIGNENT: Is the mapping quality (MAPQ) > mapqSTRINGENT
+
+### 2. ``getISposition()``
+
+**GOALS:** Get the IS, shear sites and random tags of each read with ``extractISposition()`` then call IS positions and abundances
+**OPTIONS:** [RECALL=TRUE] to compute the RECALL abundances
+
+
+
+
+
+As ``extractISposition()`` can be slow, with the ``SAVE=TRUE`` an intermediate table summarising IS, shear sites and random tag is saved (under: ``sampleName.args`` "_ISposFixed_QUAL_", ``LTR``, ".txt"). This file will be automatically reused if the function is run twice on the same dataset.
+
 
 1. 'STRIGENT' reads and 'ALL' reads are loaded using loadClonalityData()
 2. IS positions and abundances are called with getISposition()
@@ -59,7 +88,7 @@ This function creates several outputs:
 2. Statistic table
 
 
-## tagContamination() FUNCTION
+## R: tagContamination() 
 
 Cross-contaminations between libraries as well as non-specific amplification of genomic positions happens in NGS clonality datasets. These need to be filtered out before comparing samples. We define four categories:
 
@@ -78,7 +107,7 @@ tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abunda
 
 ### VARIABLES
 
-The function takes an IS table containing the following columns:
+The function takes an IS table containing at least the following columns:
 
 |seqnames|start|filtered.max|ID|sample|
 |:-:|---|---|---|---|
@@ -89,7 +118,7 @@ The function takes an IS table containing the following columns:
 
 Fine-tuning of the entropy parameters is extremely important and will depend on the structure of your dataset (longitudinal samples, sequencing depth, ...). The ``tagContamination()`` is here as an example but might have to be adapted for your needs.
 
-### EXPLAINATIONS
+### DETAILS
 
 ``tagContamination()`` is divided in four parts.
 
@@ -122,4 +151,30 @@ The function reports either the provided IS table with CATEGORY annotations as a
 
 For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
 
-## integrationSiteMotif() FUNCTION
+## R: integrationSiteMotif() 
+
+**GOAL:** Extract nucleotide motifs surrounding a single genomic position.
+
+The function takes an IS table containing at least the following columns:
+
+|seqnames|start|strand|
+|:-:|---|---|
+|chr1|4010901|*|
+|chr2|1103712|*|
+
+Strand can be +, - or * (for undetermined).
+
+```
+integrationSiteMotif(IS = NULL, win = 20, fasta = "path/to/genome.fasta")
+```
+
+Nucleotides sequences surrounding each IS are retrieved from the genome fasta file (``fasta``) using an up/downstream window of ``win`` bases.
+
+SeqLogo graphics can be plotted using [ggseqlogo](https://github.com/omarwagih/ggseqlogo)
+
+```
+
+```
+
+
+ 

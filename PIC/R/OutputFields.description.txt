@@ -1,8 +1,0 @@
- "chr"                     "strand"                  "exactPosition"           "LTR"                    
- [5] "raw.ALL.LTR5"            "filtered.ALL.LTR5"       "raw.ALL.LTR3"            "filtered.ALL.LTR3"      
- [9] "raw.PROPER.LTR5"         "filtered.PROPER.LTR5"    "raw.PROPER.LTR3"         "filtered.PROPER.LTR3"   
-[13] "raw.STRINGENT.LTR5"      "filtered.STRINGENT.LTR5" "raw.STRINGENT.LTR3"      "filtered.STRINGENT.LTR3"
-[17] "filtered.ALL.max"        "filtered.PROPER.max"     "filtered.STRINGENT.max"  "p.LTR5"                 
-[21] "p.LTR3"                  "p.LTR"                   "raw.RECALL.LTR5"         "filtered.RECALL.LTR5"   
-[25] "raw.RECALL.LTR3"         "filtered.RECALL.LTR3"    "filtered.RECALL.max"     "p.LTR5.RECALL"          
-[29] "p.LTR3.RECALL"           "p.LTR.RECALL"            "potentialLTR5_deletion" 

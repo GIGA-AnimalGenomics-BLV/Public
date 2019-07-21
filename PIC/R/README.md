@@ -1,5 +1,6 @@
 # R PIC: Get IS Table
 
+This pipeline can be used to process data generated following Rosewick *et al* (2017) or Artesi *et al* (2017). 
 
 ## INTRODUCTION
 

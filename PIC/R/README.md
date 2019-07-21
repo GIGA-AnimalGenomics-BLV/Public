@@ -43,49 +43,65 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 
 ### 2. ``getISposition()``
 
-**GOALS:** Get the IS, shear sites and random tags of each read with ``extractISposition()`` then call IS positions and abundances
-**OPTIONS:** [RECALL=TRUE] to compute the RECALL abundances
+**GOALS:** IS positions and abundances
+**INFO:** [RECALL=TRUE] to compute the RECALL abundances
+
+#### 2.1. ``extractISposition()``:
+
+* For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
+* Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
+
+|read_id|flag|chr|mapq|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|exactPosition|properPair|shearSite|randomTag|LTR|
+|:-:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|M00991:68:000000000-AU82H:1:1105:21631…|99|chr10|1|+|-33|NA|TRUE|FALSE|0|1|2656307|TRUE|chr10:2656307|ATTTAGCG|LTR3|
+|M00991:68:000000000-AU82H:1:1101:18425…|83|chr10|1|-|-33|NA|TRUE|FALSE|0|1|10614746|TRUE|chr10:106147…|AAATGGAC|LTR3|
+|M00991:68:000000000-AU82H:1:1110:17539…|83|chr10|33|-|-33|NA|TRUE|FALSE|0|1|11813053|TRUE|chr10:118130…|ACCTGAAA|LTR3|
+
+#### 2.2. Collapse reads into IS:
+
+The IS is called using the STRINGENT reads (in proper pairs and MAPQ > ``mapq.val``). We currently use MAPQ = 33. 
+
+IS abundance is called using the STRINGENT reads. For debugging reasons we call in twice:
+
+* RAW ABUNDANCE: All the reads are used.
+* FILTERED ABUNDANCE: PCR duplicates are removed by collapsing reads displaying the exact same random tag and shear site. 
+
+Although we only use the abundance called with the STRINGENT reads, we define two additional categories for debugging purposes:
+
+1. PROPER-PAIRS: Abundance is called with only the reads in proper pairs with a MAPQ > 3
+2. ALL: Abundance is called with all the reads that support the IS
+
+These two categories are added to the final IS table and can be used to fine-tune the MAPQ parameters.
+
+#### 2.3. Close IS are regrouped:
+
+The same proviral insertion can sometimes be identified by several reads displaying slightly different IS, often due to sequencing or mapping errors. To account for such errors, we regroup IS located within ``mapgap`` up/downstream window (i.e., 75 bp). 
+
+The position supported by the highest abundance is returned. All the reads (raw and filtered) are summed to compute the actual IS abundance. 
+
+#### 2.4. RECALL:
+
+If RECALL=TRUE, the IS abundance is recomputed using all the reads located within a ``winRecall`` up/downstream window, regardless of the MAPQ or SAM flag.
+
+### 3. ``mergeLTRs_V2``
+
+After processing separately the reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
+
+* 3'LTR IS within 25 bp of a 5' LTR are merged. 
+	* The position reported is by default the one of the 3'LTR. If not available, the 5'LTR position is reported
+	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
+		* *This process avoid overestimating the IS abundance.
+		
+
+### 4. ``annotateIS()``
+
+Add some information about the position of each IS relative to the closest genes or genomic features. 
+
+### 5. ``getStatistics()``
+
+### 6. ``Outputs``
 
 
-
-
-
-As ``extractISposition()`` can be slow, with the ``SAVE=TRUE`` an intermediate table summarising IS, shear sites and random tag is saved (under: ``sampleName.args`` "_ISposFixed_QUAL_", ``LTR``, ".txt"). This file will be automatically reused if the function is run twice on the same dataset.
-
-
-1. 'STRIGENT' reads and 'ALL' reads are loaded using loadClonalityData()
-2. IS positions and abundances are called with getISposition()
-
-	* extractISposition(..., STRINGENT_reads): get a table containing readID, IS, shear sites and random.
-	* Reads sharing the same IS are regrouped and IS abundance is calculated with either:
-		* RAW READS: Abundance based on all the reads including PCR duplicates
-		* FILTERED READS: Abundance without PCR duplicates (collapse reads sharing IS/random_tag/shear_site.
-	* IS located within a 75bp upstream/downstream window are collapsed as they probably arise from mapping errors.
-		* RAW and FILTERED reads are summed
-		* Position of the IS with the highest number of FILTERED reads is reported
-	* If RECALL=TRUE, the abundance of each IS called with the STRINGENT reads is recalculated using all the reads
-		* extractISposition(..., ALL_reads)
-		* Cross these IS with the STRINGENT IS
-		* For each IS, get the reads within a 600 bp up/down window
-		* Compute the RECALL abundance with these new reads (RAW.RECALL and FILTERED.RECALL)
-
-3. Combine LTR5 and LTR3 tables with mergeLTRs_V2()
-
-	* LTR3 IS within 25 bp upstream/downstream window of an LTR5 IS are merged
-		* When available LTR3 position is systematically reported
-		* To avoid artificial inflation of the IS abundance, the max(LTR3 abundance, LTR5 abundance) is reported
-
-4. Gene annotation is added using annotateIS()
-
-5. Statistics of the run are computed: getStatistics()
-
-6. Final results are outputed.
-
-
-This function creates several outputs:
-
-1. IS table
-2. Statistic table
 
 
 ## R: tagContamination() 

@@ -27,8 +27,8 @@ Reads supporting the 5'LTR or 3'LTR are processed separately.
  
 ### 1. ``loadClonalityData()``
 
-**GOALS:** Load the BAM file. 
-**RETURNS:** List of R1 reads, R2 reads and viral reads (mapping only to the virus)
+* **GOALS:** Load the BAM file. 
+* **RETURNS:** List of R1 reads, R2 reads and viral reads (mapping only to the virus)
 
 |read_id|flag|chr|pos|mapq|cigar|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|
 |:-:|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -43,13 +43,12 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 
 ### 2. ``getISposition()``
 
-**GOALS:** IS positions and abundances
-**INFO:** [RECALL=TRUE] to compute the RECALL abundances
+* **GOALS:** Get IS positions and abundances
 
 #### 2.1. ``extractISposition()``:
 
-* For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
-* Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
+> For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
+> Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
 
 |read_id|flag|chr|mapq|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|exactPosition|properPair|shearSite|randomTag|LTR|
 |:-:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -92,17 +91,46 @@ After processing separately the reads supporting the 3'LTR and 5'LTR, the two ta
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
 		* *This process avoid overestimating the IS abundance.
 		
-
 ### 4. ``annotateIS()``
 
-Add some information about the position of each IS relative to the closest genes or genomic features. 
+Add information about the position of each IS relative to the closest genes or genomic features. 
 
 ### 5. ``getStatistics()``
 
+Returns the run statistics:
+
+|VALUE|DEFINITION|
+|:-:|---|
+totPureFilteredVirus3|Number of non PCR-duplicated reads mapping ONLY to the provirus, 3'LTR| 
+totPureFilteredVirus5|Number of non PCR-duplicated reads mapping ONLY to the provirus, 5'LTR|
+totPureRawVirus3|Number of reads mapping ONLY to the provirus, 3'LTR| 
+totPureRawVirus5|Number of reads mapping ONLY to the provirus, 5'LTR|
+totRead|Total number of reads or sequencing depth|
+totReadFilt3LTR|Number of non PCR-duplicated reads mapping supporting the IS, 3'LTR| 
+totReadFilt5LTR|Number of non PCR-duplicated reads mapping supporting the IS, 5'LTR| 
+totReadFiltLTR|Number of non PCR-duplicated reads mapping supporting the IS, max(5'LTR, 3'LTR)| 
+totReadRaw3LTR|Number of reads mapping supporting the IS, 3'LTR| 
+totReadRaw5LTR|Number of reads mapping supporting the IS, 5'LTR| 
+totReadRawLTR|Number of reads mapping supporting the IS, max(5'LTR, 3'LTR)|
+NumberIS_LTR3|Number of IS supported only by reads mapping to the 3'LTR| 
+NumberIS_LTR5|Number of IS supported only by reads mapping to the 5'LTR|
+NumberIS_LTR5LTR3|Number of IS supported by reads at both LTRs|
+
 ### 6. ``Outputs``
 
+Four outputs are created with ``PIC()``
 
+|OUTPUT|DEFINITION|
+|:-:|---|
+|``sampleName.args``-clonalityResults.txt|Results without merging LTRs|
+|``sampleName.args``-mergedIS.txt|Results after merging LTRs. TXT file|
+|``sampleName.args``-mergedIS.xls|Results after merging LTRs. XLS file|
+|``sampleName.args``-SIMPLIFIED_mergedIS.txt|Simplified table containing the merged LTRs results. Only the STRINGENT columns are reported|
+|``sampleName.args``-statistics.txt|Run statistics|
 
+Description of each field is contained in this github at [result field description]()
+
+---
 
 ## R: tagContamination() 
 
@@ -167,6 +195,8 @@ The function reports either the provided IS table with CATEGORY annotations as a
 
 For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
 
+---
+
 ## R: integrationSiteMotif() 
 
 **GOAL:** Extract nucleotide motifs surrounding a single genomic position.
@@ -187,10 +217,5 @@ integrationSiteMotif(IS = NULL, win = 20, fasta = "path/to/genome.fasta")
 Nucleotides sequences surrounding each IS are retrieved from the genome fasta file (``fasta``) using an up/downstream window of ``win`` bases.
 
 SeqLogo graphics can be plotted using [ggseqlogo](https://github.com/omarwagih/ggseqlogo)
-
-```
-
-```
-
 
  

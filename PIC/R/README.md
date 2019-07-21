@@ -18,8 +18,7 @@ This package contains the ``PIC()`` wrapper function which takes the following a
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-STRINGENT: Only the best mapping position of each read
-ALL: Report up to 11 mapping position per read
+**STRINGENT:** Only the best mapping position of each read, **ALL:** Report up to 11 mapping position per read
 
 ## PIC() FUNCTION
 
@@ -61,5 +60,67 @@ This function creates several outputs:
 
 
 ## tagContamination() FUNCTION
+
+Cross-contaminations between libraries as well as non-specific amplification of genomic positions happens in NGS clonality datasets. These need to be filtered out before comparing samples. We define four categories:
+
+1. **UNIQUE:** IS found in only one individual
+2. **NON-SPECIFIC:** IS found in > nonSpecific (%) of the sequenced libraries
+3. **ENTROPY**: IS found in different individuals for which we can find the actual owner based on its distribution between individuals
+	* *ENTROPY_RECURRENCE:* The IS is mainly more often detected in one individual
+	* *ENTROPY_ABUNDANCE:* The IS is abundantly detected in one individual 
+4. **DUBIOUS:** IS found in different individuals but with not information to retrieve the actual owner
+ 
+DUBIOUS and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
+
+```
+tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 5, report = FALSE)
+```
+
+### VARIABLES
+
+The function takes an IS table containing the following columns:
+
+|seqnames|start|filtered.max|ID|sample|
+|:-:|---|---|---|---|---|
+|chr1|4010901|100|sample1|sample1_library1|
+|chr2|1103712|2000|sample1|sample1_library1|
+|chr1|4010901|1|sample2|sample2_library1|
+|chr3|531901|100|sample2|sample2_library1|
+
+Fine-tuning of the entropy parameters is extremely important and will depend on the structure of your dataset (longitudinal samples, sequencing depth, ...). The ``tagContamination()`` is here as an example but might have to be adapted for your needs.
+
+### EXPLAINATIONS
+
+``tagContamination()`` is divided in four parts.
+
+1. IS are clustered with a small up/down windows (``maxgap``).
+	* **WHY?** Exact position of a IS can be slightly shifted due to mapping errors, alternative detection of the 3'LTR or 5'LTR, mapping errors, mismatches, *etc*
+2. For each IS, in every individuals, the recurrence (= number times it is detected) and maximal abundance are computed.
+3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundances are computed separately
+4. Based on the filtering options the IS are separated in 5 CATEGORIES. 
+	* We typically use this two sets of parameters:
+		* *ENTROPY_RECURRENCE:* entropy < 0.85 (``filt.recurrence``)
+		* *ENTROPY_ABUNDANCE:* entropy < 0.85 (``filt.abundance``) & at least one animal needs to have > 5 reads supporting the IS (``minReadMax``)
+		* *NON-SPECIFIC:* the IS is detected in > 6% of the samples (``nonSpecific``)
+		* *UNIQUE:* IS only detected in one individual
+		* *DUBIOUS:* All the other IS
+5. The TRUE owner of each IS is assigned.
+	* *NON-SPECIFIC & DUBIOUS:* NA
+	* *UNIQUE:* Only one
+	* *ENTROPY_RECURRENCE:* The owner is the individual with the highest recurrence 
+	* *ENTROPY_ABUNDANCE:* The owner is the individual with the maximal abundance
+	
+	
+The function reports either the provided IS table with CATEGORY annotations as a new column (``report = FALSE``) or an intermediate table containing the recurrence, maximal abundances, shannon entropies, *etc* for each IS in each individual. This table can used to determine the right entropy parameters.
+
+|index|ID|recurence|max.abundance|numberSample|numberIndividuals|e.recurrence|e.abundance|CATEGORY|position|
+|:-:|---|---|---|---|---|---|---|---|---|
+|198833|229|1|1|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
+|198833|233|27|362|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
+|198833|234|1|4|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
+|198833|236|2|2|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
+
+
+For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
 
 ## integrationSiteMotif() FUNCTION

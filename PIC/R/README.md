@@ -81,7 +81,7 @@ tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abunda
 The function takes an IS table containing the following columns:
 
 |seqnames|start|filtered.max|ID|sample|
-|:-:|---|---|---|---|---|
+|:-:|---|---|---|---|
 |chr1|4010901|100|sample1|sample1_library1|
 |chr2|1103712|2000|sample1|sample1_library1|
 |chr1|4010901|1|sample2|sample2_library1|
@@ -119,7 +119,6 @@ The function reports either the provided IS table with CATEGORY annotations as a
 |198833|233|27|362|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 |198833|234|1|4|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 |198833|236|2|2|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
-
 
 For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
 

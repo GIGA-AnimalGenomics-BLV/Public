@@ -40,10 +40,9 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 
 * **isPRIMARY:** Is it a primary alignment ?
 * **isSTRIGNENT:** Is the mapping quality (MAPQ) > mapqSTRINGENT
-
-
-
-
+* **numberAlignment:** How many different alignments are returned by the aligner ?
+ 
+ 
 ### 2. ``getISposition()``
 
 * **GOALS:** Get IS positions and abundances
@@ -51,7 +50,6 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 #### 2.1. ``extractISposition()``:
 
 > For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
-
 > Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
 
 |read_id|flag|chr|mapq|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|exactPosition|properPair|shearSite|randomTag|LTR|
@@ -85,10 +83,8 @@ The position supported by the highest abundance is returned. All the reads (raw 
 #### 2.4. RECALL:
 
 If RECALL=TRUE, the IS abundance is recomputed using all the reads located within a ``winRecall`` up/downstream window, regardless of the MAPQ or SAM flag.
-
-
-
-
+ 
+ 
 ### 3. ``mergeLTRs_V2``
 
 After processing separately the reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
@@ -97,16 +93,13 @@ After processing separately the reads supporting the 3'LTR and 5'LTR, the two ta
 	* The position reported is by default the one of the 3'LTR. If not available, the 5'LTR position is reported
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
 		* *This process avoid overestimating the IS abundance.
-
-
-
+ 
+ 
 ### 4. ``annotateIS()``
 
 Add information about the position of each IS relative to the closest genes or genomic features. 
-
-
-
-
+ 
+ 
 ### 5. ``getStatistics()``
 
 Returns the run statistics:
@@ -127,10 +120,8 @@ totReadRawLTR|Number of reads mapping supporting the IS, max(5'LTR, 3'LTR)|
 NumberIS_LTR3|Number of IS supported only by reads mapping to the 3'LTR| 
 NumberIS_LTR5|Number of IS supported only by reads mapping to the 5'LTR|
 NumberIS_LTR5LTR3|Number of IS supported by reads at both LTRs|
-
-
-
-
+ 
+ 
 ### 6. ``Outputs``
 
 Four outputs are created with ``PIC()``
@@ -144,6 +135,8 @@ Four outputs are created with ``PIC()``
 |``sampleName.args``-statistics.txt|Run statistics|
 
 Description of each field is contained in this github at [result field description]()
+ 
+ 
 
 ---
 
@@ -209,7 +202,8 @@ The function reports either the provided IS table with CATEGORY annotations as a
 |198833|236|2|2|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 
 For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
-
+ 
+ 
 ---
 
 ## R: integrationSiteMotif() 

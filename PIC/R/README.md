@@ -22,7 +22,7 @@ This R package contains the ``PIC()`` wrapper function which detect IS and assig
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-#### **Reads supporting the 5'LTR or 3'LTR are first processed separately**
+### **Reads supporting the 5'LTR or 3'LTR are first processed separately**
 
 --- 
 	

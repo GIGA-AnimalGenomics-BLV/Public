@@ -1,8 +1,9 @@
 # R PIC: Get IS Table
 
+
 ## INTRODUCTION
 
-This package contains the ``PIC()`` wrapper function which takes the following arguments:
+This R package contains the ``PIC()`` wrapper function which detect IS and assign their abundance. The following arguments are required:
 
 * **STRINGENT:** Only the best mapping position of each read (PRIMARY)
 * **ALL:** Report up to 11 mapping position per read
@@ -21,10 +22,10 @@ This package contains the ``PIC()`` wrapper function which takes the following a
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-**Reads supporting the 5'LTR or 3'LTR are first processed separately**
+#### **Reads supporting the 5'LTR or 3'LTR are first processed separately**
 
-
-
+--- 
+	
 ### 1. ``loadClonalityData()``
 
 * **GOALS:** Load the BAM file. 
@@ -41,16 +42,16 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 * **isPRIMARY:** Is it a primary alignment ?
 * **isSTRIGNENT:** Is the mapping quality (MAPQ) > mapqSTRINGENT
 * **numberAlignment:** How many different alignments are returned by the aligner ?
- 
- 
+
+--- 
 ### 2. ``getISposition()``
 
 * **GOALS:** Get IS positions and abundances
 
 #### 2.1. ``extractISposition()``:
 
-> For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
-> Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
+* For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
+* Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
 
 |read_id|flag|chr|mapq|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|exactPosition|properPair|shearSite|randomTag|LTR|
 |:-:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -58,19 +59,21 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 |M00991:68:000000000-AU82H:1:1101:18425…|83|chr10|1|-|-33|NA|TRUE|FALSE|0|1|10614746|TRUE|chr10:106147…|AAATGGAC|LTR3|
 |M00991:68:000000000-AU82H:1:1110:17539…|83|chr10|33|-|-33|NA|TRUE|FALSE|0|1|11813053|TRUE|chr10:118130…|ACCTGAAA|LTR3|
 
+* ``exactPosition`` corresponds to the viral-host junction.
+
 #### 2.2. Collapse reads into IS:
 
 The IS is called using the STRINGENT reads (in proper pairs and MAPQ > ``mapq.val``). We currently use MAPQ = 33. 
 
 IS abundance is called using the STRINGENT reads. For debugging reasons we call in twice:
 
-* RAW ABUNDANCE: All the reads are used.
-* FILTERED ABUNDANCE: PCR duplicates are removed by collapsing reads displaying the exact same random tag and shear site. 
+* **RAW ABUNDANCE:** All the reads are used.
+* **FILTERED ABUNDANCE:** PCR duplicates are removed by collapsing reads displaying the exact same random tag and shear site. 
 
 Although we only use the abundance called with the STRINGENT reads, we define two additional categories for debugging purposes:
 
-1. PROPER-PAIRS: Abundance is called with only the reads in proper pairs with a MAPQ > 3
-2. ALL: Abundance is called with all the reads that support the IS
+1. **PROPER-PAIRS:** Abundance is called with only the reads in proper pairs with a MAPQ > 3
+2. **ALL:** Abundance is called with all the reads that support the IS
 
 These two categories are added to the final IS table and can be used to fine-tune the MAPQ parameters.
 
@@ -84,7 +87,7 @@ The position supported by the highest abundance is returned. All the reads (raw 
 
 If RECALL=TRUE, the IS abundance is recomputed using all the reads located within a ``winRecall`` up/downstream window, regardless of the MAPQ or SAM flag.
  
- 
+--- 
 ### 3. ``mergeLTRs_V2``
 
 After processing separately the reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
@@ -94,12 +97,12 @@ After processing separately the reads supporting the 3'LTR and 5'LTR, the two ta
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
 		* *This process avoid overestimating the IS abundance.
  
- 
+--- 
 ### 4. ``annotateIS()``
 
 Add information about the position of each IS relative to the closest genes or genomic features. 
  
- 
+---  
 ### 5. ``getStatistics()``
 
 Returns the run statistics:
@@ -121,7 +124,7 @@ NumberIS_LTR3|Number of IS supported only by reads mapping to the 3'LTR|
 NumberIS_LTR5|Number of IS supported only by reads mapping to the 5'LTR|
 NumberIS_LTR5LTR3|Number of IS supported by reads at both LTRs|
  
- 
+--- 
 ### 6. ``Outputs``
 
 Four outputs are created with ``PIC()``
@@ -137,7 +140,6 @@ Four outputs are created with ``PIC()``
 Description of each field is contained in this github at [result field description]()
  
  
-
 ---
 
 ## R: tagContamination() 

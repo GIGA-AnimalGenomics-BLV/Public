@@ -4,6 +4,9 @@
 
 This package contains the ``PIC()`` wrapper function which takes the following arguments:
 
+* **STRINGENT:** Only the best mapping position of each read (PRIMARY)
+* **ALL:** Report up to 11 mapping position per read
+
 |VARIABLE|TYPE|DEFINITION|
 |:-:|---|---|
 |LTR3.args|**character**|path/to/file.bam reads supporting LTR3 IS (STRINGENT)
@@ -18,13 +21,10 @@ This package contains the ``PIC()`` wrapper function which takes the following a
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-Two types of mapping are needed:
+**Reads supporting the 5'LTR or 3'LTR are first processed separately**
 
-* **STRINGENT:** Only the best mapping position of each read (PRIMARY)
-* **ALL:** Report up to 11 mapping position per read
 
-Reads supporting the 5'LTR or 3'LTR are processed separately. 
- 
+
 ### 1. ``loadClonalityData()``
 
 * **GOALS:** Load the BAM file. 
@@ -38,8 +38,11 @@ Reads supporting the 5'LTR or 3'LTR are processed separately.
 
 In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf), reads are flagged with:
 
-* isPRIMARY: Is it a primary alignment ?
-* isSTRIGNENT: Is the mapping quality (MAPQ) > mapqSTRINGENT
+* **isPRIMARY:** Is it a primary alignment ?
+* **isSTRIGNENT:** Is the mapping quality (MAPQ) > mapqSTRINGENT
+
+
+
 
 ### 2. ``getISposition()``
 
@@ -48,6 +51,7 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 #### 2.1. ``extractISposition()``:
 
 > For each read, the IS, shear site and random tag is assigned, taking into account remaining soft-clipping (``getCIGARsize()`` & ``splitCIGAR()``).
+
 > Flag reads in ``properPair`` based on their SAM flag (83, 99, 147 or 163)
 
 |read_id|flag|chr|mapq|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|exactPosition|properPair|shearSite|randomTag|LTR|
@@ -82,6 +86,9 @@ The position supported by the highest abundance is returned. All the reads (raw 
 
 If RECALL=TRUE, the IS abundance is recomputed using all the reads located within a ``winRecall`` up/downstream window, regardless of the MAPQ or SAM flag.
 
+
+
+
 ### 3. ``mergeLTRs_V2``
 
 After processing separately the reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
@@ -90,10 +97,15 @@ After processing separately the reads supporting the 3'LTR and 5'LTR, the two ta
 	* The position reported is by default the one of the 3'LTR. If not available, the 5'LTR position is reported
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
 		* *This process avoid overestimating the IS abundance.
-		
+
+
+
 ### 4. ``annotateIS()``
 
 Add information about the position of each IS relative to the closest genes or genomic features. 
+
+
+
 
 ### 5. ``getStatistics()``
 
@@ -115,6 +127,9 @@ totReadRawLTR|Number of reads mapping supporting the IS, max(5'LTR, 3'LTR)|
 NumberIS_LTR3|Number of IS supported only by reads mapping to the 3'LTR| 
 NumberIS_LTR5|Number of IS supported only by reads mapping to the 5'LTR|
 NumberIS_LTR5LTR3|Number of IS supported by reads at both LTRs|
+
+
+
 
 ### 6. ``Outputs``
 
@@ -187,7 +202,7 @@ Fine-tuning of the entropy parameters is extremely important and will depend on 
 The function reports either the provided IS table with CATEGORY annotations as a new column (``report = FALSE``) or an intermediate table containing the recurrence, maximal abundances, shannon entropies, *etc* for each IS in each individual. This table can used to determine the right entropy parameters.
 
 |index|ID|recurence|max.abundance|numberSample|numberIndividuals|e.recurrence|e.abundance|CATEGORY|position|
-|:-:|---|---|---|---|---|---|---|---|---|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |198833|229|1|1|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 |198833|233|27|362|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 |198833|234|1|4|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
@@ -204,7 +219,7 @@ For is particular case, one IS (``position``) is detected in 31 samples (``numbe
 The function takes an IS table containing at least the following columns:
 
 |seqnames|start|strand|
-|:-:|---|---|
+|:-:|:-:|:-:|
 |chr1|4010901|*|
 |chr2|1103712|*|
 

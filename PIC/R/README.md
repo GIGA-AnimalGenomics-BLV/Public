@@ -23,7 +23,7 @@ This R package contains the ``PIC()`` wrapper function which detect IS and assig
 |virus.args|**character**|viral_chromosome_name
 |mapqSTRINGENT|**numeric**|MAPQ of stringent reads
 
-### **Reads supporting the 5'LTR or 3'LTR are first processed separately**
+### **NB:** Reads supporting the 5'LTR or 3'LTR are first processed separately
 
 --- 
 	
@@ -106,24 +106,7 @@ Add information about the position of each IS relative to the closest genes or g
 ---  
 ### 5. ``getStatistics()``
 
-Returns the run statistics:
-
-|VALUE|DEFINITION|
-|:-:|---|
-totPureFilteredVirus3|Number of non PCR-duplicated reads mapping ONLY to the provirus, 3'LTR| 
-totPureFilteredVirus5|Number of non PCR-duplicated reads mapping ONLY to the provirus, 5'LTR|
-totPureRawVirus3|Number of reads mapping ONLY to the provirus, 3'LTR| 
-totPureRawVirus5|Number of reads mapping ONLY to the provirus, 5'LTR|
-totRead|Total number of reads or sequencing depth|
-totReadFilt3LTR|Number of non PCR-duplicated reads mapping supporting the IS, 3'LTR| 
-totReadFilt5LTR|Number of non PCR-duplicated reads mapping supporting the IS, 5'LTR| 
-totReadFiltLTR|Number of non PCR-duplicated reads mapping supporting the IS, max(5'LTR, 3'LTR)| 
-totReadRaw3LTR|Number of reads mapping supporting the IS, 3'LTR| 
-totReadRaw5LTR|Number of reads mapping supporting the IS, 5'LTR| 
-totReadRawLTR|Number of reads mapping supporting the IS, max(5'LTR, 3'LTR)|
-NumberIS_LTR3|Number of IS supported only by reads mapping to the 3'LTR| 
-NumberIS_LTR5|Number of IS supported only by reads mapping to the 5'LTR|
-NumberIS_LTR5LTR3|Number of IS supported by reads at both LTRs|
+Returns the run statistics.
  
 --- 
 ### 6. ``Outputs``
@@ -138,7 +121,7 @@ Four outputs are created with ``PIC()``
 |``sampleName.args``-SIMPLIFIED_mergedIS.txt|Simplified table containing the merged LTRs results. Only the STRINGENT columns are reported|
 |``sampleName.args``-statistics.txt|Run statistics|
 
-Description of each field and an example is contained in this github at [result field description](https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PIC/R/OutputFields.description.xlsx)
+Description of each field and examples are located in this github at [result field description](https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PIC/R/OutputFields.description.xlsx)
  
  
 ---

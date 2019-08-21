@@ -2,7 +2,7 @@
 % Please edit documentation in R/PCIP_summarise.R
 \name{PCIP_summarise}
 \alias{PCIP_summarise}
-\title{Collapse results into Integration Site table}
+\title{Collapse results into an Integration Site table}
 \usage{
 PCIP_summarise(PCIPbreakpoints = NULL, mergeISdistance = 200,
   mergeShearSiteDistance = 0, minDistanceLTR = 300,
@@ -11,45 +11,51 @@ PCIP_summarise(PCIPbreakpoints = NULL, mergeISdistance = 200,
 \arguments{
 \item{PCIPbreakpoints}{tibble. TARGET-HOST breakpoints from \code{PCIP_getBreakPoints}}
 
-\item{mergeISdistance}{numerical. Maximal distance (Upstream/Downstream) to group reads supporting the same IS.}
+\item{mergeISdistance}{numeric. Window (up/down) to regroup close viral-host junctions into an integration site.}
 
-\item{mergeShearSiteDistance}{numerical. Maximal distance (Upstream/Downstream) to group reads with the same shear site.}
+\item{mergeShearSiteDistance}{numeric. Window (up/down) to collapse reads displaying the same shear site.}
 
-\item{filterIS}{numerical. Only report readID for IS supported by x reads.}
+\item{minDistanceLTR}{numeric. 1001, 01 and 10 reads with large gaps in the LTRs often introduce false positive. Filter those with a distance to the nearest viral edge > minDistanceLTR.}
+
+\item{distanceFLAG}{numeric. Flag integration sites located too close (within distanceFLAG, up/down).}
 }
 \value{
 list Field description:
 \enumerate{
 \item Integration Site Table [[1]].
 \itemize{
-\item seqnames (character) Chromosome name
-\item strand (character) TARGET orientation related to the HOST genome
-\item edge5.pos (double) 5' edge position into HOST genome
-\item edge5.count (double) Number of reads supporting the 5' edge
-\item edge3.pos (double) 3' edge position into HOST genome
-\item edge3.count (double) Number of reads supporting the 3' edge
-\item ID (character) TARGET location into the HOST genome formated as chr:start-end
-\item count.max (double) Maximum number of reads supporting that IS (max(edge5.count, edge3.pos, na.rm = T))
+\item seqnames (character). Chromosome name.
+\item strand (character). TARGET orientation related to the HOST genome.
+\item edge5.pos (double). 5' edge position into HOST genome.
+\item edge5.raw (double). Number of reads supporting the 5' edge (ALL).
+\item edge5.count (double). Number of reads supporting the 5' edge (PCR duplicates removed).
+\item edge3.pos (double). 3' edge position into HOST genome.
+\item edge3.raw (double). Number of reads supporting the 3' edge (ALL).
+\item edge3.count (double). Number of reads supporting the 3' edge (PCR duplicates removed).
+\item ID (character). TARGET location into the HOST genome formated as chr:start-end.
+\item count.max (double). Maximum number of reads supporting that IS (max(edge5.count, edge3.pos, na.rm = T))
+\item edge5.meanDistLTR (double). mean distance to the 5' edge in the reads supporting that IS.
+\item edge5.sdDistLTR (double). sd distance to the 5' edge in the reads supporting that IS.
+\item edge3.meanDistLTR (double). mean distance to the 3' edge in the reads supporting that IS.
+\item edge3.sdDistLTR (double). sd distance to the 3' edge in the reads supporting that IS.
+\item FLAG.DIST (logical). Flag IS with mean distance to one of the two LTR > 100 bp.
+\item FLAG.READS (logical). Flag IS with less than 10 non-PCR duplicats reads.
+\item FLAG.OWNER (logical). Flag IS within a distanceFLAG distance of another IS.
+\item OWNER (numeric). Extremely close IS are often the results of false positive IS due to the read processing. For every IS within a distanceFLAG sliding window, the real IS is the one supported by the most reads.
+
 }
 \item Read description table [[2]].
 \itemize{
-\item readID (character) ID of the read
-\item ID (character) TARGET location into the HOST genome formated as chr:start-end
-\item strand (character) TARGET orientation related to the HOST genome
-\item max.pos (character) Position (5' edge or 3' edge) supported by the most reads and use as anchor to look for variants
+\item readID (character). ID of the read.
+\item ID (character). TARGET location into the HOST genome formated as chr:start-end.
+\item strand (character). TARGET orientation related to the HOST genome.
+\item maxIS (character). Position (5' edge or 3' edge) supported by the most reads.
 }
 }
 }
 \description{
-Group and count reads supporting the same breakpoint. Generate an Integration Sites (IS) table.
-}
-\note{
-minimap2PAF <- readPairwiseAlignmentFile(minimap2PAF="my/path/to/minimap2.align")
-minimap2PAF.filter <- PCIP_filter(minimap2PAF = minimap2PAF, targetName="HTLV")
-minimap2PAF.breakpoints <- PCIP_getBreakPoints(PAF = minimap2PAF.filter, lengthTarget = 9091, targetName="HTLV", gapToEdge = 200)
-myResults <- PCIP_summarise(PCIPbreakpoints = minimap2PAF.breakpoints, mergeISdistance = 200)
-integrationSite.table <- myResults[[1]]
-splitFASTQ.table <- myResults[[2]]
+Group close viral-host junctions into integration sites.
+Compute the abundance of each clone and before (raw) or after (filtered) removing PCR duplicates.
 }
 \author{
 Vincent Hahaut

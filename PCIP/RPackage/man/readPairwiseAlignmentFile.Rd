@@ -9,16 +9,10 @@ readPairwiseAlignmentFile(alignFile = NULL)
 \arguments{
 \item{alignFile}{Path to minimap2 PAF file}
 }
-\value{
-Returns a tibble containing mapping results from PAF.
-}
 \description{
 Read the first 18th columns from pairwise alignment (PAF) produced by minimap2.
 
 For more information about the PAF format refers to: \href{https://github.com/lh3/miniasm/blob/master/PAF.md}{Minimap2 PAF format}
-}
-\note{
-readPairwiseAlignmentFile(minimap2PAF="my/path/to/minimap2.align")
 }
 \author{
 Vincent Hahaut

@@ -124,7 +124,9 @@ R functions to extract integration sites and the corresponding clone abundance c
 R CMD INSTALL PCIP_1.0.tar.gz
 ```
 
-Integration site detection is performed using the following R functions. A detailled description of each function can be found at:. The following command can be run using R:
+Integration site detection is performed using the following R functions. A detailled description of each function can be found at:. 
+
+The following command can be run using R:
 
 ```
 # 0. Load functions 
@@ -198,8 +200,3 @@ do
 done < mySample_uniqueIS.txt
 
 ```
-
-----
-
-# CALLING INTEGRATION SITES: DETAILS
-

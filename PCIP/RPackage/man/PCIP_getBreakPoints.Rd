@@ -15,33 +15,29 @@ PCIP_getBreakPoints(PAF = NULL, lengthTarget = NULL,
 
 \item{targetName}{character. Name of the TARGET chromosome}
 
-\item{gapAlignment}{numeric. Maximum mean gap tolerated in the alignment between substrings.}
+\item{gapAlignment}{numeric or NA. Maximum mean gap tolerated between substrings. For debugging purpose.}
+
+\item{distanceToLTR}{numeric or NA. Exclude reads with alignment gaps near the LTR edge > distanceToLTR. For debugging purpose.}
+
+\item{returnFILTEREDout}{logical. Directly returns reads with large distanceToLTR. For debugging purpose.}
 }
 \value{
 Returns a tibble. Field description:
 \itemize{
-\item index (numeric) Line index
-\item readID (character) ID of the read
-\item seqnames.genome (character) HOST Chromosome name
-\item edge5_breakPoint (double) Position of the TARGET 5' edge in the HOST genome
-\item edge3_breakPoint (double) Position of the TARGET 3' edge in the HOST genome
-\item shearSite.genome (double) ShearSite position in the HOST genome
-\item breakPointEdge (character) TARGET edge type detected in this read (edge3, edge5, edge3-edge5 or edge5-edge3)
-\item distanceEdge3_edge5 (double) Distance between the two TARGET edges if both are detected
-\item strand.target (character) TARGET substring orientation
-\item strand.genome (character) GENOME substring orientation
-\item context (character) TARGET - HOST substrings orientations related to each other
-\item ligation (character) TARGET - HOST structure of the read as binary code (0 = HOST and 1 = TARGET)
-\item minDistanceEdge (double) Minimal distance to one TARGET edge
+\item readID (character) ID of the read.
+\item seqnames.genome (character) HOST Chromosome name.
+\item shearSite.genome (numeric) ShearSite position in the HOST genome.
+\item strand.target (character) TARGET substring orientation.
+\item strand.genome (character) GENOME substring orientation.
+\item context (character) TARGET - HOST substrings orientations related to each other.
+\item ligation (character) TARGET - HOST structure of the read as binary code (0 = HOST and 1 = TARGET).
+\item minDistanceEdge (double) Minimal distance to one TARGET edge.
+\item edge5_breakPoint (double) Position of the TARGET 5' edge in the HOST genome.
+\item edge3_breakPoint (double) Position of the TARGET 3' edge in the HOST genome.
 }
 }
 \description{
-Extract TARGET-HOST junction (= Breakpoint) and DNA fragmentation site (= Shearsite) created by sonication .
-}
-\note{
-minimap2PAF <- readPairwiseAlignmentFile(minimap2PAF="my/path/to/minimap2.align")
-minimap2PAF.filter <- PCIP_filter(minimap2PAF = minimap2PAF, targetName="HTLV")
-minimap2PAF.breakpoints <- PCIP_getBreakPoints(PAF = minimap2PAF.filter, lengthTarget = 9091)
+Extract TARGET-HOST junctions (= breakpoints) and DNA fragmentation site (= shearsite) created by sonication.
 }
 \author{
 Vincent Hahaut

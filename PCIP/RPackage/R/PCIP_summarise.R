@@ -103,8 +103,8 @@ PCIP_summarise <- function(PCIPbreakpoints = NULL, mergeISdistance = 200, mergeS
     print(paste0("mergeShearSiteDistance == ", mergeShearSiteDistance))
     # 2.1.1. Transform the data to GRanges:
     shearSite.gr <- breaks %>%
-      mutate(shearSite.genome = ifelse(is.na(shearSite.genome), 0, shearSite.genome), %>%
-               start = shearSite.genome,
+      mutate(shearSite.genome = ifelse(is.na(shearSite.genome), 0, shearSite.genome),
+             start = shearSite.genome,
              end = shearSite.genome
              ) %>%
       select(index, seqnames.genome, start, end) %>%

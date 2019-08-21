@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="../WORKFLOW/WORKFLOW.jepg">
+  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/PCIP/WORKFLOW/WORKFLOW.jepg">
 </p>
 
 <p align="center">
-  <img src="../WORKFLOW/FILTER.jepg">
+  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/PCIP/WORKFLOW/FILTER.jepg">
 </p>
 
 <p align="center">
-  <img src="../WORKFLOW/BREAKPOINTS.jepg">
+  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/PCIP/WORKFLOW/BREAKPOINTS.jepg">
 </p>
 
 <p align="center">
-  <img src="../WORKFLOW/SUMMARISE.jepg">
+  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/PCIP/WORKFLOW/SUMMARISE.jepg">
 </p>

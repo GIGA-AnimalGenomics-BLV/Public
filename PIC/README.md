@@ -6,6 +6,9 @@ This pipeline is dedicated to the analysis of integration site "clonality" data 
 
 The following example is intended to work on HTLV-1 provirus. Some parameters (index, LTR sequences, ...) have to be adapated for other retroviruses. 
 
+![workflow](https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PIC/WORKFLOW/figure_01_workflow.jpg)
+
+
 ## PREREQUISITES
 
 * [bowtie](http://bowtie-bio.sourceforge.net/tutorial.shtml) (≥1.1.2)
@@ -30,6 +33,12 @@ The following example is intended to work on HTLV-1 provirus. Some parameters (i
 * Scripts contained in the "tools" folder 
   * filterbyname.sh (from the splice-aware global aligner [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/))
   * resynchronizePaired.py
+
+PIC package is not available on CRAN. It has to be downloaded from this github (R/PIC_1.3.tar.gz). After installing the prerequisites in R, PIC can be installed as follows from the terminal: 
+
+```
+R CMD INSTALL PIC_1.3.tar.gz
+```
 
 Specified versions have been tested succesfully. Installation guidelines can be found in INSTALL.
 Although the pipeline is relatively light in memory, running it with less than 16 Gb of RAM is not recommended. 

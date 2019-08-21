@@ -1,17 +1,21 @@
-# PCIP-Seq Workflow
+# Pooled CRISPR Inverse PCR sequencing 
 
-Pooled CRISPR Inverse PCR sequencing (PCIP-seq) protocol has been designed to specifically amplify and sequence proviral genomes and corresponding surrounding host genome using [Oxford Nanopore](https://nanoporetech.com/) long reads technology. This technic allows the simultaneous coverage of both proviral and host genome from which integration site, mutation and genomic alterations can be subsequently extracted.
+Pooled CRISPR Inverse PCR sequencing (PCIP-seq) protocol has been designed to sequence the insertion site and its associated provirus using Oxford Nanopore long-reads technology. The protocol can be found in [PCIP-seq](https://www.biorxiv.org/content/10.1101/558130v2).
 
-In brief, random shearing of the host DNA by sonication generates chimeric proviral-host fragments. These fragments are circularized and linear DNA is digested. Then Cas9 enzyme is used to target proviral sequences of interest to reopen the circles. Finally long-range inverse PCR is performed to amplify the fragments. Circularization and Cas9 cut typically creates fragments with proviral sequences flanking an host sequence. The goal of the subsequent pipeline can be summarised in four steps: 
+![protocol](WORKFLOW/Protocol.jpg)
+
+## SUMMARY: Analysis
 
 1. Raw Data Basecalling (.fast5 to .fastq)
 2. Mapping to the TARGET-HOST Reference
 3. Calling Integration Sites (IS)
 4. Calling Integration Sites Specific Variants
 
-## Prerequisits
+The following bioinformatics pipeline is dedicated 
 
-* albacore (≥ 2.3.1) 
+## PREREQUISITES
+
+* albacore (≥ 2.3.1) or guppy
 * [porechops (≥ 0.2.4)](https://github.com/rrwick/Porechop) 
 * [samtools (≥ 1.9)](http://samtools.sourceforge.net/) 
 * [minimap2 (≥ 2.10)](https://github.com/lh3/minimap2) 

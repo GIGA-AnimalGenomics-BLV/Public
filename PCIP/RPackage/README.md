@@ -13,7 +13,7 @@
 # PCIP_GETBREAKPOINTS
 
 <p align="center">
-  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PCIP/WORKFLOW/BREAKPOINTS.jpeg">
+  <img src="https://github.com/GIGA-AnimalGenomics-BLV/Public/blob/master/PCIP/WORKFLOW/BREAKPOINTS.jpeg">
 </p>
 
 # PCIP_SUMMARISE

@@ -6,7 +6,7 @@ This pipeline is dedicated to the analysis of integration site "clonality" data 
 
 The following example is intended to work on HTLV-1 provirus. Some parameters (index, LTR sequences, ...) have to be adapated for other retroviruses. 
 
-!(image)[https://github.com/GIGA-AnimalGenomics-BLV/Public/tree/master/PIC/WORKFLOW/figure_01_workflow.jpg]
+![image](WORKFLOW/figure_01_workflow.jpg)
 
 
 ## PREREQUISITES

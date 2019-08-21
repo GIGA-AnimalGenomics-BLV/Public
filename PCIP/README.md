@@ -3,7 +3,7 @@
 Pooled CRISPR Inverse PCR sequencing (PCIP-seq) protocol has been designed to sequence the insertion site and its associated provirus using Oxford Nanopore long-reads technology. The protocol can be found in [PCIP-seq](https://www.biorxiv.org/content/10.1101/558130v2).
 
 <p align="center">
-  <img width="400" height="500" src="WORKFLOW/Protocol.jpg">
+  <img src="WORKFLOW/Protocol.jpg">
 </p>
 
 ## SUMMARY: Analysis

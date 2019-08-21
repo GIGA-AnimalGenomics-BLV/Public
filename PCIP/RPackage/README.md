@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="WORKFLOW/WORKFLOW.jepg">
+  <img src="../WORKFLOW/WORKFLOW.jepg">
 </p>
 
 <p align="center">
-  <img src="WORKFLOW/FILTER.jepg">
+  <img src="../WORKFLOW/FILTER.jepg">
 </p>
 
 <p align="center">
-  <img src="WORKFLOW/BREAKPOINTS.jepg">
+  <img src="../WORKFLOW/BREAKPOINTS.jepg">
 </p>
 
 <p align="center">
-  <img src="WORKFLOW/SUMMARISE.jepg">
+  <img src="../WORKFLOW/SUMMARISE.jepg">
 </p>

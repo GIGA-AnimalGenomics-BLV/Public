@@ -1,7 +1,5 @@
 # R PIC: Get IS Table
 
-This pipeline can be used to process data generated following Rosewick *et al* (2017) or Artesi *et al* (2017). 
-
 ## INTRODUCTION
 
 This R package contains the ``PIC()`` wrapper function which detect IS and assign their abundance. The following arguments are required:

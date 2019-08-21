@@ -1,28 +1,27 @@
 #' @title Get Read Breakpoints and ShearSites
 #'
 #' @description
-#' Extract TARGET-HOST junction (= Breakpoint) and DNA fragmentation site (= Shearsite) created by sonication .
+#' Extract TARGET-HOST junctions (= breakpoints) and DNA fragmentation site (= shearsite) created by sonication.
 #'
 #' @param PAF tibble. Pairwise Alignment file (PAF) generated with minimap2, red with \code{readPairwiseAlignmentFile} and formated with \code{PCIP_filter}
 #' @param targetName character. Name of the TARGET chromosome
 #' @param lengthTarget numeric. Length of the TARGET chromosome in base pairs
-#' @param gapAlignment numeric. Maximum mean gap tolerated in the alignment between substrings.
+#' @param gapAlignment numeric or NA. Maximum mean gap tolerated between substrings. For debugging purpose.
+#' @param distanceToLTR numeric or NA. Exclude reads with alignment gaps near the LTR edge > distanceToLTR. For debugging purpose.
+#' @param returnFILTEREDout logical. Directly returns reads with large distanceToLTR. For debugging purpose.
 #'
 #' @return Returns a tibble. Field description:
 #' \itemize{
-#' \item index (numeric) Line index
-#' \item readID (character) ID of the read
-#' \item seqnames.genome (character) HOST Chromosome name
-#' \item edge5_breakPoint (double) Position of the TARGET 5' edge in the HOST genome
-#' \item edge3_breakPoint (double) Position of the TARGET 3' edge in the HOST genome
-#' \item shearSite.genome (double) ShearSite position in the HOST genome
-#' \item breakPointEdge (character) TARGET edge type detected in this read (edge3, edge5, edge3-edge5 or edge5-edge3)
-#' \item distanceEdge3_edge5 (double) Distance between the two TARGET edges if both are detected
-#' \item strand.target (character) TARGET substring orientation
-#' \item strand.genome (character) GENOME substring orientation
-#' \item context (character) TARGET - HOST substrings orientations related to each other
-#' \item ligation (character) TARGET - HOST structure of the read as binary code (0 = HOST and 1 = TARGET)
-#' \item minDistanceEdge (double) Minimal distance to one TARGET edge
+#' \item readID (character) ID of the read.
+#' \item seqnames.genome (character) HOST Chromosome name.
+#' \item shearSite.genome (numeric) ShearSite position in the HOST genome.
+#' \item strand.target (character) TARGET substring orientation.
+#' \item strand.genome (character) GENOME substring orientation.
+#' \item context (character) TARGET - HOST substrings orientations related to each other.
+#' \item ligation (character) TARGET - HOST structure of the read as binary code (0 = HOST and 1 = TARGET).
+#' \item minDistanceEdge (double) Minimal distance to one TARGET edge.
+#' \item edge5_breakPoint (double) Position of the TARGET 5' edge in the HOST genome.
+#' \item edge3_breakPoint (double) Position of the TARGET 3' edge in the HOST genome.
 #' }
 #'
 #' @keywords PCIP
@@ -39,11 +38,6 @@
 #' @importFrom stats end na.omit sd start
 #' @importFrom utils head write.table
 #'
-#' @note
-#' minimap2PAF <- readPairwiseAlignmentFile(minimap2PAF="my/path/to/minimap2.align")
-#' minimap2PAF.filter <- PCIP_filter(minimap2PAF = minimap2PAF, targetName="HTLV")
-#' minimap2PAF.breakpoints <- PCIP_getBreakPoints(PAF = minimap2PAF.filter, lengthTarget = 9091)
-#'
 #' @export
 PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NULL, gapAlignment = NA, distanceToLTR = NA, returnFILTEREDout = FALSE){
 
@@ -54,62 +48,60 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
   if(is_empty(targetName)){ stop('Empty or Absent targetName argument! Please provide the TARGET chromosome name') }
   if(isFALSE(all(c("ligation", "mapGap") %in% colnames(PAF)))){ stop('PAF needs to be prepared with PCIP_filter() prior to PCIP_getBreakPoints()!') }
 
-  # 0. OPTION: REMOVE READS WITH MEAN ALIGNMENT GAPS >= gapAlignment
+  # 0. OPTION: REMOVE READS WITH A MEAN ALIGNMENT GAP >= gapAlignment
   if(!is.na(gapAlignment)){PAF <- filter(PAF, meanGap < gapAlignment)}
 
   ###################
   #### 1. TARGET ####
   ###################
-  if(nrow(PAF) > 100000){ print('This may take some time, ...') }
+  if(nrow(PAF) > 100000){ print('This may take some time ...') }
 
-  print('1. Summarise TARGET substring information and extract target-genome LTR information')
+  print("1. Summarise TARGET substring information and assign reads to 5' or 3' LTR")
 
   targets <- PAF %>%
     select(readID, seqnames, start, end, strand, ligation, readStart_position, readEnd_position) %>%
     # 1.1. Filter out GENOME substrings
     filter(seqnames == targetName) %>%
-    # 1.2. Extract the distance to the 5' edge (distanceEdge5) and 3' edge (distanceEdge3)
-    # Determine the closest edge (closestEdge) and its distance to the edge of the TARGET (distanceEdgeSub)
+    # 1.2. Extract the distance of the read to the 5' edge (distanceEdge5) and 3' edge (distanceEdge3)
     mutate(distanceEdge5 = abs(0 - start),
            distanceEdge3 = abs(as.numeric(lengthTarget) - end)) %>%
     ungroup() %>%
+    # 1.3. Extract the minimal to one of the edge
     mutate(minDistanceEdgeSubstring = pmap_dbl(list(distanceEdge5, distanceEdge3), min)) %>%
-    # 1.3. Summarise results at the read level
-    # LTR5 or LTR3 based on the substring with the closest distance to one LTR
+    # 1.4. Summarise results at the read level
     group_by(readID) %>%
-    # 1.3.1.
+    # Depending on the closest edge, define the read as supporting the 5' or 3' edge.
     mutate(
       closestEdge = ifelse(min(distanceEdge5) < min(distanceEdge3), "edge5", "edge3"),
       strand.target = paste(unique(strand), collapse = ","),
       minDistanceEdge = min(distanceEdge5, distanceEdge3),
       index = which(minDistanceEdgeSubstring == minDistanceEdge)
     ) %>%
-    # 1.3.2.
-    # To determine where is located the integration in the read after ligation, the position of the LTR-host junction in the read is reported
-    # The viral-host junction can be on the left (i.e., 10) or right (i.e., 01) of the read, depending on its position regarding the host genome
+    # 1.5. Determine where is located the viral-host junction in the read. In case of 101 or 1001, can be at the right or left of the read.
     mutate(breakPtsPosition = case_when(
       ligation %in% c("101","1001") ~ ifelse(index == 1, "left", "right"),
       ligation == "01" ~ "right",
       ligation == "10" ~ "left")) %>%
     ungroup() %>%
-    # 1.5. Finish
+    # 1.6. Substrings should map to the same strand. Few exceptions do not. Report their mapping strand as unknown (*).
     mutate(strand.target = ifelse(nchar(strand.target) > 1, "*", strand.target))
 
-  # OPTION: Remove reads with large mapping gaps in the target
-  # These gaps can come from LTR deletions or mapping issues
-  # This option can be used to explore these reads
+  # OPTION: Remove reads with large gaps near their LTR.
+  # These gaps can come from LTR deletions, incomplete sequencing or mapping issues.
+  # This option can be used to explore these reads.
   if(!is.na(distanceToLTR)){
-    print('CAREFUL: distanceToLTR will remove reads with large gaps in the LTRs')
+    print(paste0('CAREFUL: distanceToLTR will remove reads with gaps > ', minDistanceEdge, ' near the LTR'))
     targets <- filter(targets, minDistanceEdge <= distanceToLTR)
 
-    # OPTION: returnFILTEREDout == TRUE directly returns these reads with mapping gaps
+    # OPTION: returnFILTEREDout == TRUE directly returns these reads with mapping large gaps.
     if(returnFILTEREDout == TRUE){
       return(filter(targets, minDistanceEdge > distanceToLTR))
-      stop("returnFILTEREDout == TRUE, return ONLY the reads with large alignment gaps in the provirus")
+      stop("returnFILTEREDout == TRUE, returns ONLY the reads with large alignment gaps in the provirus")
     }
   }
 
-  # 1001 ligation could be counted twice. Only keep those that have the smallest minDistanceEdge
+  # As 1001 can contain full-length provirus they could be counted as two integrations sites.
+  # Only keep those that have the viral-host edge with the smallest minDistanceEdge.
   if(any(targets$ligation == 1001)){
     index1001 <- targets %>%
     rownames_to_column("rowN") %>%
@@ -121,11 +113,11 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
     targets <- targets[-as.numeric(index1001$rowN),]
   }
 
-  print('2. Summarise GENOME substring information')
-
   ###################
   #### 2. GENOME ####
   ###################
+
+  print('2. Summarise GENOME substring information')
 
   genome_concat <- PAF %>%
     select(readID, seqnames, start, end, strand, ligation) %>%
@@ -143,15 +135,16 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
               by = c("readID", "readID")
     ) %>%
     # 2.3. Concatenate strand informations
+    # Sometimes minimap2 attribute different strands to the same read: considered as 'unknown'.
     group_by(readID) %>%
     mutate(strand.genome = paste(unique(strand.genome), collapse = ","),
-           strand.genome = if_else(strand.genome %in% c("+", "-"), strand.genome, "*"), # Sometimes minimap2 attribute different strands to the same read: considered as 'unknown'
+           strand.genome = if_else(strand.genome %in% c("+", "-"), strand.genome, "*"),
            context = if_else(strand.target == strand.genome, "concordant", "discordant")) %>%
     # 2.4. Remove ambiguous mapping strands
     filter(strand.genome != "*")
 
     ####### 2.5. Clean-up
-    # 2.5.1. 1001: To avoid inflating counts only keep the 10 or 01 that contains the best integration site
+    # 1001: To avoid inflating counts only keep the 10 or 01 that contains the best integration site
     if(any(genome_concat$ligation == 1001)){
       genome.1001 <- genome_concat %>%
         rownames_to_column("rowN") %>%
@@ -165,7 +158,7 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
       genome_concat <- genome_concat[-as.numeric(genome.1001$index),]
     }
 
-    # 2.5.2. In rare cases substrings have the same distance to LTR. Remove them
+    # In rare cases substrings have the same distance to LTR. Remove them
     genome_concat <- genome_concat %>%
       group_by(readID) %>%
       filter(n() == 1) %>%
@@ -212,9 +205,10 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
   read_breakPoints <- bind_rows(edges.neg.Left, edges.pos.Left, edges.neg.right, edges.pos.right) %>%
     select(readID, seqnames.genome, shearSite.genome, closestEdge, integrationSite, strand.target, strand.genome, context, ligation, minDistanceEdge) %>%
     spread(key = closestEdge, value = integrationSite) %>%
-    # Can't find the exact shearSites in 10 and 01, put 9999999999 to shearSite to count them all as the same when looking at the abundance. Avoid inflating the counts.
+    # The shear site in 10 and 01 reads cannot confidently be identify. Attribute the shear site (9999999999) to all 10 and 01 to avoid inflating the final abundance count.
     mutate(shearSite.genome = ifelse(ligation %in% c("10", "01"), 9999999999, shearSite.genome))
 
+  # In case no 3' or no 5' LTR is detected:
   if(any(colnames(read_breakPoints) %in% "edge3")){
     read_breakPoints <- dplyr::rename(read_breakPoints, "edge3_breakPoint" = edge3)
   } else {
@@ -242,25 +236,3 @@ PCIP_getBreakPoints <- function(PAF = NULL, lengthTarget = NULL, targetName = NU
 
   print('5. Done! ')
 }
-
-# OLD:
-#edges <- genome_concat %>%
-#  group_by(readID) %>%
-#  mutate(integrationSite =
-#           case_when(
-#             strand.genome == "+" & breakPtsPosition == "left" ~ min(start.genome),
-#             strand.genome == "+" & breakPtsPosition == "right" ~ max(end.genome),
-#             strand.genome == "-" & breakPtsPosition == "left" ~ max(end.genome),
-#             strand.genome == "-" & breakPtsPosition == "right" ~ min(start.genome)
-#           )
-#  ) %>%
-#  mutate(shearSite.genome =
-#           case_when(
-#             strand.genome == "+" & breakPtsPosition == "left" ~ max(end.genome),
-#             strand.genome == "+" & breakPtsPosition == "right" ~ min(start.genome),
-#             strand.genome == "-" & breakPtsPosition == "left" ~ min(start.genome),
-#             strand.genome == "-" & breakPtsPosition == "right" ~ max(end.genome)
-#           )
-#  ) %>%
-#  ungroup()
-

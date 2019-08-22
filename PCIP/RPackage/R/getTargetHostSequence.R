@@ -1,7 +1,7 @@
 #' @title PCIP_getTargetHostSequence
 #'
 #' @description
-#' Return the target sequence surrounded by the genomic sequence into which it is inserted
+#' Give a genomic position and create
 #'
 #' @param fasta.genome Character. Path/to/genome.fa.
 #' @param fasta.target Character. Path/to/target.fa.
@@ -35,7 +35,7 @@ PCIP_getTargetHostSequence <- function(fasta.genome = NULL, fasta.target = NULL,
   target.seq <- getSeq(targetSeq)
 
   if(orientation == "-"){
-    target.seq <- reverseComplement(target.seq)
+    target.seq <- reverse(target.seq)
   }
 
   # 3. Combine
@@ -44,7 +44,7 @@ PCIP_getTargetHostSequence <- function(fasta.genome = NULL, fasta.target = NULL,
   upstream <- substr(genome.seq, middle, width(gr))
 
   targetHost <- DNAStringSet(paste(unlist(downstream), unlist(target.seq), unlist(upstream), sep = ""))
-  names(targetHost) <- paste0(position, "_target")
+  names(targetHost) <- paste0("host_target")
 
   # 4. Write
   writeXStringSet(targetHost, paste0(out.path, "/", gsub(x=position, pattern = ":|-", replacement = "_"), "_target.fa"))

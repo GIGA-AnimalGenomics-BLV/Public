@@ -284,7 +284,7 @@ PCIP_summarise <- function(PCIPbreakpoints = NULL, mergeISdistance = 200, mergeS
   # FLAG.DIST = Is this integration site supported by reads with large mapping gaps ?
   # FLAG.READS = Is this integration site supported by less than 10 non PCR-duplicats reads ?
   breaks.summerised <- mutate(breaks.summerised,
-      FLAG.DIST = ifelse(pmin(.$edge5.meanDistLTR, .$edge3.meanDistLTR, na.rm = T)  > 100, F, T),
+      FLAG.DIST = ifelse(pmin(edge5.meanDistLTR, edge3.meanDistLTR, na.rm = T)  > 100, F, T),
       FLAG.READS = ifelse(count.max < 10, F, T)
     )
 

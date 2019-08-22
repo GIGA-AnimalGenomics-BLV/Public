@@ -51,8 +51,8 @@
 #' @export
 PCIP_targetSV <- function(bam.path = NULL, viralLength = NULL, minseglen = 50, out = NULL, minCoverage = 5, ID = NULL, provirus = "all", results = "FILTER"){
 
-  #suppressPackageStartupMessages(library(changepoint))
-  #suppressPackageStartupMessages(library(tidyverse))
+  suppressPackageStartupMessages(library(changepoint))
+  suppressPackageStartupMessages(library(tidyverse))
 
   if(is_empty(bam.path)){ stop('Empty or Absent bam.path argument!') }
   if(is_empty(viralLength)){ stop('Empty or Absent viralLength argument!') }
@@ -100,7 +100,7 @@ PCIP_targetSV <- function(bam.path = NULL, viralLength = NULL, minseglen = 50, o
     mutate(coverage = DEL + INS + BASE)
 
   # 3. Compute the change point function
-  changePts.coverage.DEL <- cpt.meanvar(coverage.tidy$DEL, method = "PELT", minseglen = minseglen)
+  changePts.coverage.DEL <- cpt.var(coverage.tidy$DEL, method = "PELT", minseglen = minseglen)
 
   # 4. Summarise results and create the report
 
@@ -114,23 +114,24 @@ PCIP_targetSV <- function(bam.path = NULL, viralLength = NULL, minseglen = 50, o
 
   coverage.windows <- apply(windows.DEL, 1, function(x)
     coverage.tidy[x["start"]:x["end"],] %>%
-      mutate(CHROM = provirus,
-             START = min(pos),
-             END = max(pos),
-             WIDTH = END-START,
-             BASE.sum = sum(BASE),
-             BASE.coverage = BASE.sum / WIDTH,
-             DEL.sum = sum(DEL),
-             DEL.coverage = DEL.sum / WIDTH,
-             INS.sum = sum(INS),
-             INS.coverage = INS.sum / WIDTH,
-             COVERAGE = (BASE.sum + DEL.sum + INS.sum) / WIDTH,
-             RATIO = DEL.coverage / COVERAGE,
-             CATEGORY = "<DEL>") %>%
-      select(CHROM, START, END, WIDTH, BASE.sum, BASE.coverage, DEL.sum, DEL.coverage, INS.sum, INS.coverage, COVERAGE, RATIO, CATEGORY) %>%
-      distinct()
-  ) %>%
+      mutate(CHROM = provirus) %>%
+      group_by(CHROM) %>%
+      summarise(
+        START = min(pos),
+        END = max(pos),
+        WIDTH = END-START,
+        BASE.sum = sum(BASE),
+        BASE.coverage = BASE.sum / WIDTH,
+        DEL.sum = sum(DEL),
+        DEL.coverage = DEL.sum / WIDTH,
+        INS.sum = sum(INS),
+        INS.coverage = INS.sum / WIDTH,
+        COVERAGE = (BASE.sum + DEL.sum + INS.sum) / WIDTH,
+        RATIO = DEL.coverage / COVERAGE,
+        CATEGORY = "<DEL>"
+      )) %>%
     bind_rows() %>%
+    select(CHROM, START, END, WIDTH, BASE.sum, BASE.coverage, DEL.sum, DEL.coverage, INS.sum, INS.coverage, COVERAGE, RATIO, CATEGORY) %>%
     filter(COVERAGE != "Inf") %>%
     mutate(FILTER =
              case_when(
@@ -138,7 +139,7 @@ PCIP_targetSV <- function(bam.path = NULL, viralLength = NULL, minseglen = 50, o
                COVERAGE < minCoverage ~ "COVERAGE",
                RATIO > 5 ~ "OUT",
                COVERAGE >= minCoverage & RATIO > .8 ~ "PASS",
-               TRUE ~ "AMBIGUIOUS"
+               TRUE ~ "NO"
              ),
            ID = ID
     )

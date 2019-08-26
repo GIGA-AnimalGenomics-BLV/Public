@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-This R package contains the ``PIC()`` wrapper function which detects integration sites (IS) and compute the corresponding clone abundance. The following arguments are required:
+This R package contains the ``PIC()`` wrapper function which detects integration sites (IS) and computes the relative abundance of the corresponding clone. The following arguments are required:
 
 * **STRINGENT:** Only the best mapping position of each read (PRIMARY)
 * **ALL:** Report up to 11 mapping position per read
@@ -58,27 +58,27 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 |M00991:68:000000000-AU82H:1:1101:18425…|83|chr10|1|-|-33|NA|TRUE|FALSE|0|1|10614746|TRUE|chr10:106147…|AAATGGAC|LTR3|
 |M00991:68:000000000-AU82H:1:1110:17539…|83|chr10|33|-|-33|NA|TRUE|FALSE|0|1|11813053|TRUE|chr10:118130…|ACCTGAAA|LTR3|
 
-* ``exactPosition`` corresponds to the viral-host junction.
+* ``exactPosition`` corresponds to the virus-host junction.
 
 #### 2.2. Collapse reads into IS:
 
-Reads sharing the same viral-host junction are regrouped as IS. The exact IS is called using the STRINGENT reads (i.e., proper pairs and MAPQ > ``mapq.val``). We currently uses MAPQ = 33. 
+Reads sharing the same virus-host junction are grouped as IS. The exact IS is called using the STRINGENT reads (i.e., proper pairs and MAPQ > ``mapq.val``). We currently use MAPQ = 33. 
 
-The actual IS abundance is called using the STRINGENT reads:
+The  IS abundance is called using the STRINGENT reads:
 
 * **RAW ABUNDANCE:** All the reads are used.
-* **FILTERED ABUNDANCE:** PCR duplicates are removed by collapsing reads displaying the exact same random tags and shear sites. 
+* **FILTERED ABUNDANCE:** PCR duplicates are removed by collapsing reads that show the same random tag and the same shear site. 
 
-Although we only use the abundance called with the STRINGENT reads, we define two additional abundance categories for debugging purposes:
+Although we only use the abundance called with the STRINGENT reads, we define two additional types of abundance for debugging purposes:
 
 1. **PROPER-PAIRS:** Abundance is called with the reads in proper pairs with a MAPQ > 3.
 2. **ALL:** Abundance is called with all the reads that could support the IS.
 
-These two categories are added to the final IS table and can be used to fine-tune the MAPQ parameters.
+These two types are added to the final IS table and can be used to fine-tune the MAPQ parameters.
 
-#### 2.3. Close IS are regrouped:
+#### 2.3. Nearby IS are grouped:
 
-The same proviral insertion can sometimes be identified by several reads displaying slightly different viral-host junctions, (i.e., due to sequencing or mapping errors). To account for such errors, we regroup IS located within ``mapgap`` up/downstream window (i.e., 75 bp). 
+The same proviral insertion site is sometimes be identified by multiple reads each displaying slightly different virus-host junctions, (i.e., due to sequencing or mapping errors). To account for such errors, we group IS located within ``mapgap`` up/downstream window (i.e., 75 bp). 
 
 The position supported by the highest number of reads is returned as the IS. All the reads are summed to compute the IS abundance. 
 
@@ -89,17 +89,17 @@ If RECALL=TRUE, the IS abundance is recomputed using all the reads located withi
 --- 
 ### 3. ``mergeLTRs_V2``
 
-After processing separately the reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
+After separately processing  reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
 
 * 3'LTR IS within 25 bp of a 5' LTR are considered as supporting the same IS. 
-	* The position reported is by default the one of the 3'LTR. If not available, the 5'LTR position is reported.
+	* The position reported is by default the position of the 3'LTR. If not available, the 5'LTR position is reported.
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
-		* This process avoid overestimating the IS abundance.
+		* This process avoids overestimating the IS abundance.
  
 --- 
 ### 4. ``annotateIS()``
 
-Add information about the position of each IS relative to the closest genes or genomic features. 
+Adds information about the position of each IS relative to the closest genes or genomic features. 
  
 ---  
 ### 5. ``getStatistics()``
@@ -133,9 +133,9 @@ Cross-contaminations between libraries as well as non-specific amplification of 
 3. **ENTROPY**: IS found in different individuals and not NON-SPECIFIC. The actual 'owner'/sample of these IS can be retrieved. 
 	* *ENTROPY_RECURRENCE:* The IS is mainly detected in one individual.
 	* *ENTROPY_ABUNDANCE:* The IS is abundantly detected in one individual.
-4. **DUBIOUS:** IS found in different individuals but with not enough information to retrieve the actual 'owner'.
+4. **UNCERTAIN:** IS found in several individuals but with too little information to retrieve the actual 'owner'.
  
-DUBIOUS and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
+UNCERTAIN and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
 
 ```
 tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 5, report = FALSE)
@@ -152,30 +152,30 @@ The function takes an IS table containing the following columns:
 |chr1|4010901|1|sample2|sample2_library1|
 |chr3|531901|100|sample2|sample2_library1|
 
-Fine-tuning of the entropy parameters is extremely important and will depend on the structure of your dataset (longitudinal samples, sequencing depth, ...). The ``tagContamination()`` is here as an example but might have to be adapted for your needs.
+Fine-tuning of the entropy parameters is extremely important and will depend on the structure of your dataset (longitudinal samples, sequencing depth, ...). The ``tagContamination()`` is shown here as an example but it may require some adjustments for your needs.
 
 ### DETAILS
 
-``tagContamination()`` is divided in four parts.
+``tagContamination()`` has four parts.
 
-1. IS are clustered with a small up/down windows (``mapgap``).
-	* **WHY?** Exact position of a IS can be slightly shifted due to mapping errors, alternative detection of the 3'LTR or 5'LTR, mapping errors, mismatches, *etc*
-2. For each IS, in every individuals, the recurrence - number times it is detected - and maximal abundance are computed.
-3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundances are computed separately. High recurrence or abundance in one individual can be used to find the IS's owner. 
+1. IS are clustered within a small up/down windows (``mapgap``).
+	* **WHY?** Exact position of an IS can be slightly shifted due to mapping errors, alternative detection of the 3'LTR or 5'LTR, mapping errors, mismatches, *etc*
+2. For each IS, in each individual, the recurrence - number of times it is detected - and maximal abundance are computed.
+3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundance are computed separately. High recurrence or abundance in one individual can be used to find the IS's owner. 
 4. Based on the filtering options the IS are separated in 5 CATEGORIES. 
 	* **ENTROPY_RECURRENCE:** entropy < 0.85 (``filt.recurrence``).
-	* **ENTROPY_ABUNDANCE:** entropy < 0.85 (``filt.abundance``) & at least one animal needs to have > 5 reads supporting the IS (``minReadMax``).
+	* **ENTROPY_ABUNDANCE:** entropy < 0.85 (``filt.abundance``) and at least one individual with > 5 reads supporting the IS (``minReadMax``).
 	* **NON-SPECIFIC:** the IS is detected in > 6% of the samples (``nonSpecific``).
 	* **UNIQUE:** IS only detected in one individual.
-	* **DUBIOUS:** All the other IS.
+	* **UNCERTAIN:** All remaining IS.
 5. The TRUE owner of each IS is assigned.
-	* **NON-SPECIFIC & DUBIOUS:** NA
+	* **NON-SPECIFIC & uNCERTAIN:** NA
 	* **UNIQUE:** Only one.
 	* **ENTROPY_RECURRENCE:** The owner is the individual with the highest recurrence.
-	* **ENTROPY_ABUNDANCE:** The owner is the individual with the maximal abundance.
+	* **ENTROPY_ABUNDANCE:** The owner is the individual with the highest abundance.
 	
 	
-The function reports either the provided IS table with CATEGORY annotations as a new column (``report = FALSE``) or an intermediate table containing the recurrence, maximal abundances, shannon entropies, *etc* for each IS in each individual. This table can used to determine the right entropy parameters.
+The function reports either the provided IS table with CATEGORY annotations as a new column (``report = FALSE``) or an intermediate table containing the recurrence, maximal abundances, shannon entropies, *etc* for each IS in each individual. This table can be used to determine the appropriate entropy parameters.
 
 |index|ID|recurence|max.abundance|numberSample|numberIndividuals|e.recurrence|e.abundance|CATEGORY|position|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -184,13 +184,13 @@ The function reports either the provided IS table with CATEGORY annotations as a
 |198833|234|1|4|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 |198833|236|2|2|31|4|0.748|0.162|ENTROPY_RECURRENCE|OAR17:4806385-4806390
 
-For is particular case, one IS (``position``) is detected in 31 samples (``numberSample``) coming from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27th times in 233 (``recurrence``) with a maximal abundance of 362 reads (``max.abundance``). Shannon entropies of the abundances (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
+Regarding this particular case, one IS (``position``) is detected in 31 samples (``numberSample``) originating from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27 times in individual 233 (``recurrence``) with an abundance of 362 reads (highest) (``max.abundance``). Shannon entropies of the abundance (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
  
 ---
 
 ## R: integrationSiteMotif() 
 
-**GOAL:** Extract nucleotide motifs surrounding a single genomic position.
+**GOAL:** Extract nucleotide motifs adjacents to a single genomic position.
 
 The function takes an IS table containing at least the following columns:
 
@@ -205,7 +205,7 @@ Strand can be +, - or * (for undetermined).
 integrationSiteMotif(IS = NULL, win = 20, fasta = "path/to/genome.fasta")
 ```
 
-Nucleotides sequences surrounding each IS are retrieved from the genome fasta file (``fasta``) using an up/downstream window of ``win`` bases.
+Nucleotide sequences adjacent to each IS are retrieved from the genome fasta file (``fasta``) using an up/downstream window of ``win`` bases.
 
 SeqLogo graphics can be plotted using [ggseqlogo](https://github.com/omarwagih/ggseqlogo)
 

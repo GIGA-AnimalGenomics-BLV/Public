@@ -2,9 +2,9 @@
 
 ## INTRODUCTION
 
-This pipeline is dedicated to the analysis of integration site "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264) and [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260). 
+This pipeline is dedicated to the analysis of NGS "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264) and [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260). 
 
-The following example is intended to work on HTLV-1 provirus. Some parameters (index, LTR sequences, ...) have to be adapated for other retroviruses. 
+Shown below is an example applied to HTLV-1 proviral integration sites. Some parameters (index, LTR sequences, ...) will require adjustments if working with other retroviruses. 
 
 ![image](WORKFLOW/figure_01_workflow.jpg)
 
@@ -45,17 +45,17 @@ Although the pipeline is relatively light in memory, running it with less than 1
 
 ### Indexes
 
-Before mapping an index needs to be created. Three FASTA files have to be provided:
+Before mapping, create an index. Three FASTA files have to be provided:
 
 * Retroviral genome
 * Host genome
 * LTR sequences 
-	* LTRs sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
-	* Provide only the sequences starting from the primer 'start' until the LTR's end.
+	* LTR sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
+	* Provide only the sequences starting from the primer 'start' until the LTR extremity.
  
 To annotate the final results a GTF file downloaded from ENSEMBL is also required (i.e., [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/))
 
-#### 1. Create bowtie2 viral-host genome
+#### 1. Create bowtie2 virus-host genome
 
 ```
 viral_genome="path/to/viral/genome.fasta"
@@ -113,7 +113,7 @@ LTR5sequence_firstbp="TGACAATGAC"
 
 ### 1. Select reads containing the linker sequence
 
-In order to speed-up detection of linker sequences, short-read aligner should be prefered over BLAST/BLAT. We create on-the-fly a new linker index for each sample.
+In order to speed-up detection of linker sequences, short-read aligners are prefered over BLAST/BLAT. We on-the-fly create a new linker index for each sample.
 
 ```
 mkdir linkerBowtie
@@ -127,19 +127,19 @@ bowtie-build -q linker.fa linker
 cd ..
 ```
 
-The linkers is then extracted from each R2 reads based on its hypothetical position (here from position 9 to 9+linkerLen). Sequencing quality is taken into account (-Q33).
+The linker is then extracted from each R2 read according to its hypothetical position (here from position 9 to 9+linkerLen). Sequencing quality is taken into account (-Q33).
 
 ```
 fastx_trimmer -Q33 -f 9 -l $linkLen -i $r2 -o read_linkers.fastq
 ```
 
-Sequences are mapped onto the linker-index using bowtie. Extract the ID of the reads displaying the right linker sequence.
+Sequences are mapped to the linker-index using bowtie. Extract the ID of the reads showing the correct linker sequence.
 
 ```
 bowtie -l 7 -p 2 -v 0 linkerBowtie/linker read_linkers.fastq | egrep `echo $linker | sed 's/\;/\|/g'` | awk '{print $1}' > readID_linkerFound.txt
 ```
 
-Filter the R1/R2 reads with the right linker.
+Filter the R1/R2 reads with the correct linker.
 
 ```
 bbmap/filterbyname.sh in=$r1 in2=$r2 out=R1_linkerFound.fastq out2=R2_linkerFound.fastq names=readID_linkerFound.txt include=t overwrite=t
@@ -161,7 +161,7 @@ bowtie2 -L 14 -p 2 -N 1 -x $bowtie2_LTR_index -U R1_virusLTR3_edge.fastq | grep 
 bowtie2 -L 14 -p 2 -N 1 -x $bowtie2_LTR_index -U R1_virusLTR5_edge.fastq | grep "LTR5" | awk '{print $1}' | grep -v "^@"  > readID_LTR5Found.txt
 ```
 
--L represent the seed substring (minimum 3 and maximum LTR length), -N the number of mismatch in the initial seed alignment (0 or 1), -x the bowtie2 index, -U specifies that data are unpaired.
+-L represent the seed substring (minimum 3 and maximum LTR length), -N the number of mismatches in the initial seed alignment (0 or 1), -x the bowtie2 index, -U specifies that data are unpaired.
 
 Intersect the results with R1/R2 to only get reads containing the linker and LTR sequences.
 
@@ -180,7 +180,7 @@ Go from a 0-base to 1-base system:
 
 ### 3. Trim the reads
 
-In order to increase the mapping efficiency, only the genomic portion of the read needs to be mapped to the host reference genome. LTR, Linker, random tag... have to be trimmed.
+In order to increase the mapping efficiency, only the host genome portion of the read will to be mapped to the host reference genome. LTR, Linker, random tag... have to be trimmed.
 
 First start by removing the linker sequence from R2:
 
@@ -224,7 +224,7 @@ cutadapt --quiet -m 10 -a $LTR3Complement_firstBp R2_LTR3Found_linkerFound_Host.
 cutadapt --quiet -m 10 -a $LTR5Complement_firstbp R2_LTR5Found_linkerFound_Host.fastq | cutadapt --quiet -m 10 -a $LTR5forward_firstBp - > R2_LTR5Found_linkerFound_Host.trimmed.fastq
 ```
 
-Finally, remaining of linker sequences are trimmed:
+Finally, remaining parts of linker sequences are trimmed:
 
 ```
 revLinker=$(echo $linker | rev)
@@ -250,11 +250,11 @@ R1_LTR5="R1_LTR5Found_linkerFound_Host.trimmed2.fastq_pairs_R1.fastq"
 R2_LTR5="R2_LTR5Found_linkerFound_Host.trimmed.fastq_pairs_R2.fastq"
 ```
 
-### 4. Align trimmed reads onto host genome
+### 4. Align trimmed reads to host genome
 
 #### 4.1.1. Extract best quality reads (i.e. proper pairs) and separate first/second strands
 
-Align reads onto the combined (host + viral reference genome) as separated chromosome. Allow -N for one mismatch maximum in the initial seed sequence detection. No-mixed option insures that only reads mapped in pairs are be reported.
+Align reads to the combined (host + virus reference genome as separated chromosome) reference genome. Allow -N for one mismatch maximum in the initial seed sequence detection. No-mixed option ensures that only reads mapped in pairs will be reported.
 
 ```
 bowtie2 -p 2 --very-sensitive -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_bowtie2_BEST.sam
@@ -273,9 +273,9 @@ $samtools sort LTR5_candidateIS_bowtie2_BEST.bam LTR5_candidateIS_bowtie2_BEST.s
 $samtools index LTR5_candidateIS_bowtie2_BEST.sorted.bam
 ```
 
-#### 4.2.1. Extract alternative position of each reads
+#### 4.2.1. Extract alternative positions of each read
 
-Extract the 11 best mapping positions of every reads. Those alternative positions will be used to detected IS in low-complexity regions (RECALL).
+Extract the 11 best mapping positions of each read. These alternative positions will be used to detect IS in low-complexity regions (RECALL).
 
 ```
 bowtie2 -p 2 --very-sensitive -k 11 -N 1 --no-mixed -x $bowtie2_virusHost_index -1 $R1_LTR3 -2 $R2_LTR3 > LTR3_candidateIS_ALTERN_bowtie2.sam
@@ -294,7 +294,7 @@ $samtools sort LTR5_candidateIS_bowtie2_ALTERN.bam LTR5_candidateIS_bowtie2_ALTE
 $samtools index LTR5_candidateIS_bowtie2_ALTERN.sorted.bam
 ```
 
-### 5. Extract reads mapping to the provirus (for quantification purpose only):
+### 5. Extract reads mapping to the provirus (for quantification purposes only):
 
 ```
 samtools view -F 0x40 -q 30 -S LTR3_candidateIS_bowtie2.sam | awk -v vir=$virus '{if($3 == vir){print $0}}' > LTR3_pureViralReads_bowtie2.sam
@@ -303,13 +303,13 @@ samtools view -F 0x40 -q 30 -S LTR5_candidateIS_bowtie2.sam | awk -v vir=$virus 
 
 ### 6. Extract random tag sequence from the R2 raw data
 
-R2 random tag is located at the first 8 bp of R2 reads
+R2 random tags correspond to the 8 first bp of R2 reads
 
 ```
 fastx_trimmer -Q33 -l 8 -i R2.fastq | fastq_to_fasta -Q33 | fasta_formatter -t | awk '{print $1"\t"$3}' > R2_randomTag.txt
 ```
 
-### 7. Extract integration sites and compute viral abundances:
+### 7. Extract integration sites and compute clone abundance:
 
 ```
 Rscript run_PIC.R "LTR3_candidateIS_bowtie2_BEST.sorted.bam" "LTR5_candidateIS_bowtie2_BEST.sorted.bam" "LTR3_candidateIS_bowtie2_ALTERN.sorted.bam" "LTR5_candidateIS_bowtie2_ALTERN.sorted.bam" "R2_randomTag.txt" $name $geneBedFile "R1.fastq" $virus 30

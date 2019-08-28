@@ -6,7 +6,7 @@ This pipeline is dedicated to the analysis of NGS "clonality" data as described 
 
 Shown below is an example applied to HTLV-1 proviral integration sites. Some parameters (index, LTR sequences, ...) will require adjustments if working with other retroviruses. 
 
-![image](Figure_workflow.jpg)
+![image](WORKFLOW/Figure_workflow.jpg)
 
 
 ## PREREQUISITES

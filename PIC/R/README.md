@@ -138,7 +138,7 @@ Cross-contaminations between libraries as well as non-specific amplification of 
 UNCERTAIN and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
 
 ```
-tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 5, report = FALSE)
+tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 0, report = FALSE)
 ```
 
 ### VARIABLES
@@ -159,7 +159,7 @@ Fine-tuning of the entropy parameters is extremely important and will depend on 
 ``tagContamination()`` has four parts.
 
 1. IS are clustered within a small up/down windows (``mapgap``).
-	* **WHY?** Exact position of an IS can be slightly shifted due to mapping errors, alternative detection of the 3'LTR or 5'LTR, mapping errors, mismatches, *etc*
+	* This option was set to 0 in our current pipeline but could be increased to account for mapping errors.
 2. For each IS, in each individual, the recurrence - number of times it is detected - and maximal abundance are computed.
 3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundance are computed separately. High recurrence or abundance in one individual can be used to find the IS's owner. 
 4. Based on the filtering options the IS are separated in 5 CATEGORIES. 
@@ -186,6 +186,26 @@ The function reports either the provided IS table with CATEGORY annotations as a
 
 Regarding this particular case, one IS (``position``) is detected in 31 samples (``numberSample``) originating from 4 individuals (``numberIndividuals`` & ``ID``). This IS is detected 27 times in individual 233 (``recurrence``) with an abundance of 362 reads (highest) (``max.abundance``). Shannon entropies of the abundance (``e.abundance``) and recurrence (``e.recurrence``) show a clear bias for individual 233. 
  
+### FINDING THE RIGHT PARAMETERS:
+
+To find the parameters fitting our dataset we currently use the following procedure:
+
+1. Run the pipeline on the data using default parameters (set report = TRUE).
+2. Choose one of the parameters (entropy recurrence or filtered).
+3. Order the data by the max(recurrence) or max(filtered-reads) among all the individuals. For instance, max(recurrence):
+
+|Animal #1|Animal #2|Animal #3|MAX|Entropy|
+|:-:|:-:|:-:|:-:|
+|IS-#1|30|1|0|30|0.2771134|
+|IS-#2|8|1|1|8|0.6390319|
+|IS-#3|4|1|1|4|0.8675632|
+|IS-#3|2|1|1|2|1.039721|
+
+4. Go through the list from top-to-bottom, looking at the decision taken by the algorithm. 
+**NB:** In this example, there is no doubt that IS-#1 belongs to Animal #1 as it is seen 30 times in it but only once in Animal #2.
+5. We currently set the empricial threshold at the limit where we could not make any certain decision anymore. For instance IS-#3 is probably coming from Animal #1 but we cannot be sure about it.
+6. Threshold is set below the value of the last confident call (i.e., 0.85 here). 
+
 ---
 
 ## R: integrationSiteMotif() 

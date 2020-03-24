@@ -129,15 +129,15 @@ Description of each field and examples are located in this github at [result fie
 Cross-contaminations observed in next-generation clonality sequencing datasets mainly results from carry-over during the sequencing process itself. Recurrent IS due to contamination need to be filtered out. We define three categories of IS:
 
 1. **UNIQUE:** IS found in only one individual
-2. **ENTROPY**: IS found in different individuals and not NON-SPECIFIC. The actual 'owner'/sample of these IS can be retrieved. 
+2. **ENTROPY**: IS found in different individuals. The IS distribution is skewed for one individual. The actual 'owner'/sample of these IS can be retrieved. 
 	* *ENTROPY_RECURRENCE:* The IS is mainly detected in one individual.
 	* *ENTROPY_ABUNDANCE:* The IS is abundantly detected in one individual.
 3. **UNCERTAIN:** IS found in several individuals but the information is not sufficient to assign the IS to its 'owner' with confidence.
  
-UNCERTAIN and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
+UNCERTAIN IS are excluded from further analysis. To detect such IS we use the following function:
 
 ```
-tagContamination(IS = NULL, nonSpecific = 6, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 0, report = FALSE)
+tagContamination(IS = NULL, filt.recurrence = 0.85, filt.abundance = 0.85, minReadMax = 5, mapgap = 0, report = FALSE)
 ```
 
 ### VARIABLES

@@ -126,14 +126,13 @@ Description of each field and examples are located in this github at [result fie
 
 ## R: tagContamination() 
 
-Cross-contaminations between libraries as well as non-specific amplification of genomic positions happen in next-generation clonality sequencing datasets. These need to be filtered out before comparing samples. We define four categories:
+Cross-contaminations observed in next-generation clonality sequencing datasets mainly results from carry-over during the sequencing process itself. Recurrent IS due to contamination need to be filtered out. We define three categories of IS:
 
 1. **UNIQUE:** IS found in only one individual
-2. **NON-SPECIFIC:** IS found in > ``nonSpecific (%)`` of the sequenced libraries
-3. **ENTROPY**: IS found in different individuals and not NON-SPECIFIC. The actual 'owner'/sample of these IS can be retrieved. 
+2. **ENTROPY**: IS found in different individuals and not NON-SPECIFIC. The actual 'owner'/sample of these IS can be retrieved. 
 	* *ENTROPY_RECURRENCE:* The IS is mainly detected in one individual.
 	* *ENTROPY_ABUNDANCE:* The IS is abundantly detected in one individual.
-4. **UNCERTAIN:** IS found in several individuals but with too little information to retrieve the actual 'owner'.
+3. **UNCERTAIN:** IS found in several individuals but the information is not sufficient to assign the IS to its 'owner' with confidence.
  
 UNCERTAIN and NON-SPECIFIC IS are excluded from further analysis. To detect such IS we use the following function:
 
@@ -162,14 +161,13 @@ Fine-tuning of the entropy parameters is extremely important and will depend on 
 	* This option was set to 0 in our current pipeline but could be increased to account for mapping errors.
 2. For each IS, in each individual, the recurrence - number of times it is detected - and maximal abundance are computed.
 3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundance are computed separately. High recurrence or abundance in one individual can be used to find the IS's owner. 
-4. Based on the filtering options the IS are separated in 5 CATEGORIES. 
+4. Based on the filtering options the IS are separated in 4 CATEGORIES. 
 	* **ENTROPY_RECURRENCE:** entropy < 0.85 (``filt.recurrence``).
 	* **ENTROPY_ABUNDANCE:** entropy < 0.85 (``filt.abundance``) and at least one individual with > 5 reads supporting the IS (``minReadMax``).
-	* **NON-SPECIFIC:** the IS is detected in > 6% of the samples (``nonSpecific``).
 	* **UNIQUE:** IS only detected in one individual.
 	* **UNCERTAIN:** All remaining IS.
 5. The TRUE owner of each IS is assigned.
-	* **NON-SPECIFIC & uNCERTAIN:** NA
+	* **UNCERTAIN:** NA
 	* **UNIQUE:** Only one.
 	* **ENTROPY_RECURRENCE:** The owner is the individual with the highest recurrence.
 	* **ENTROPY_ABUNDANCE:** The owner is the individual with the highest abundance.
@@ -203,30 +201,8 @@ To find the parameters fitting our dataset we currently use the following proced
 
 4. Go through the list from top-to-bottom, looking at the decision taken by the algorithm. 
 **NB:** In this example, there is no doubt that IS-#1 belongs to Animal #1 as it is seen 30 times in it but only once in Animal #2.
-5. We currently set the empricial threshold at the limit where we could not make any certain decision anymore. For instance IS-#3 is probably coming from Animal #1 but we cannot be sure about it.
+5. We currently set an empirical threshold at the first point in the list for which where we are unable to make a  clear decision. In the example above,  IS-#3 probably belongs to Animal #1 but we cannot be fully confident about this.
 6. Threshold is set below the value of the last confident call (i.e., 0.85 here). 
 
----
-
-## R: integrationSiteMotif() 
-
-**GOAL:** Extract nucleotide motifs adjacents to a single genomic position.
-
-The function takes an IS table containing at least the following columns:
-
-|seqnames|start|strand|
-|:-:|:-:|:-:|
-|chr1|4010901|*|
-|chr2|1103712|*|
-
-Strand can be +, - or * (for undetermined).
-
-```
-integrationSiteMotif(IS = NULL, win = 20, fasta = "path/to/genome.fasta")
-```
-
-Nucleotide sequences adjacent to each IS are retrieved from the genome fasta file (``fasta``) using an up/downstream window of ``win`` bases.
-
-SeqLogo graphics can be plotted using [ggseqlogo](https://github.com/omarwagih/ggseqlogo)
 
  

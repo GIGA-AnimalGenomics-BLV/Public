@@ -200,7 +200,9 @@ To find the parameters fitting our dataset we currently use the following proced
 |IS-#3|2|1|1|2|1.039721|
 
 4. Go through the list from top-to-bottom, looking at the decision taken by the algorithm. 
+
 **NB:** In this example, there is no doubt that IS-#1 belongs to Animal #1 as it is seen 30 times in it but only once in Animal #2.
+
 5. We currently set an empirical threshold at the first point in the list for which where we are unable to make a  clear decision. In the example above,  IS-#3 probably belongs to Animal #1 but we cannot be fully confident about this.
 6. Threshold is set below the value of the last confident call (i.e., 0.85 here). 
 

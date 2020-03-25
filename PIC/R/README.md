@@ -2,9 +2,9 @@
 
 ## INTRODUCTION
 
-This R package contains the ``PIC()`` wrapper function which detects integration sites (IS) and computes the relative abundance of the corresponding clone. The following arguments are required:
+This R package contains the ``PIC()`` wrapper function which detects integration sites (IS) and computes the relative abundances of the corresponding clones. The following arguments are required:
 
-* **STRINGENT:** Only the best mapping position of each read (PRIMARY)
+* **STRINGENT:** Only the best mapping position of each read (= primary alignment)
 * **ALL:** Report up to 11 mapping position per read
 
 |VARIABLE|TYPE|DEFINITION|
@@ -27,7 +27,7 @@ This R package contains the ``PIC()`` wrapper function which detects integration
 	
 ### 1. ``loadClonalityData()``
 
-* **GOALS:** Load the BAM file. 
+* **GOALS:** Load the BAM files. 
 * **RETURNS:** List of R1 reads, R2 reads and viral reads (mapping only to the virus)
 
 |read_id|flag|chr|pos|mapq|cigar|strand|AS|XS|isPRIMARY|isSTRINGENT|N_ScoreLower|numberAlignment|
@@ -62,9 +62,9 @@ In addition of the [SAM fields](https://samtools.github.io/hts-specs/SAMv1.pdf),
 
 #### 2.2. Collapse reads into IS:
 
-Reads sharing the same virus-host junction are grouped as IS. The exact IS is called using the STRINGENT reads (i.e., proper pairs and MAPQ > ``mapq.val``). We currently use MAPQ = 33. 
+Reads sharing the same virus-host junction are grouped as IS. The exact IS is called using the STRINGENT reads (i.e., proper pairs and MAPQ >= ``mapq.val``). We currently use MAPQ = 33. 
 
-The  IS abundance is called using the STRINGENT reads:
+The  IS abundances are called using the STRINGENT reads:
 
 * **RAW ABUNDANCE:** All the reads are used.
 * **FILTERED ABUNDANCE:** PCR duplicates are removed by collapsing reads that show the same random tag and the same shear site. 
@@ -78,7 +78,7 @@ These two types are added to the final IS table and can be used to fine-tune the
 
 #### 2.3. Nearby IS are grouped:
 
-The same proviral insertion site is sometimes be identified by multiple reads each displaying slightly different virus-host junctions, (i.e., due to sequencing or mapping errors). To account for such errors, we group IS located within ``mapgap`` up/downstream window (i.e., 75 bp). 
+The same proviral insertion site can be identified by multiple reads each displaying slightly different virus-host junctions in some rare cases (i.e., due to sequencing or mapping errors). To account for such errors, we group IS located within ``mapgap`` up/downstream window (i.e., 75 bp). 
 
 The position supported by the highest number of reads is returned as the IS. All the reads are summed to compute the IS abundance. 
 
@@ -92,9 +92,9 @@ If RECALL=TRUE, the IS abundance is recomputed using all the reads located withi
 After separately processing  reads supporting the 3'LTR and 5'LTR, the two tables are merged. 
 
 * 3'LTR IS within 25 bp of a 5' LTR are considered as supporting the same IS. 
-	* The position reported is by default the position of the 3'LTR. If not available, the 5'LTR position is reported.
+	* The position reported is by default the one of the 3'LTR. If not available, the 5'LTR position is reported.
 	* The final IS abundance is computed using the following function: ``max(LTR5.filtered, LTR3.filtered)``
-		* This process avoids overestimating the IS abundance.
+		* This process prevents from overestimating the IS abundance.
  
 --- 
 ### 4. ``annotateIS()``
@@ -126,11 +126,11 @@ Description of each field and examples are located in this github at [result fie
 
 ## R: tagContamination() 
 
-Cross-contaminations observed in next-generation clonality sequencing datasets mainly results from carry-over during the sequencing process itself. Recurrent IS due to contamination need to be filtered out. We define three categories of IS:
+Cross-contaminations observed in next-generation clonality sequencing datasets mainly result from carry-over during the sequencing process itself. Recurrent IS due to contaminations need to be filtered out. We define three categories of IS:
 
-1. **UNIQUE:** IS found in only one individual
-2. **ENTROPY**: IS found in different individuals. The IS distribution is skewed for one individual. The actual 'owner'/sample of these IS can be retrieved. 
-	* *ENTROPY_RECURRENCE:* The IS is mainly detected in one individual.
+1. **UNIQUE:** IS found in only one individual.
+2. **ENTROPY**: IS found in different individuals. The IS distribution is skewed for one individual. The actual 'owner/sample' of this IS can be retrieved. 
+	* *ENTROPY_RECURRENCE:* The IS is reccurently detected in one individual.
 	* *ENTROPY_ABUNDANCE:* The IS is abundantly detected in one individual.
 3. **UNCERTAIN:** IS found in several individuals but the information is not sufficient to assign the IS to its 'owner' with confidence.
  
@@ -158,9 +158,9 @@ Fine-tuning of the entropy parameters is extremely important and will depend on 
 ``tagContamination()`` has four parts.
 
 1. IS are clustered within a small up/down windows (``mapgap``).
-	* This option was set to 0 in our current pipeline but could be increased to account for mapping errors.
+	* This option is set by default to 0 but could be increased to account for mapping errors or residual sequencing errors if not already taken care of.
 2. For each IS, in each individual, the recurrence - number of times it is detected - and maximal abundance are computed.
-3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundance are computed separately. High recurrence or abundance in one individual can be used to find the IS's owner. 
+3. For each IS, the shannon entropy (log2) of the recurrences and maximal abundance - both among all samples - are computed. High recurrence or abundance in one individual can be used to find the IS's owner. 
 4. Based on the filtering options the IS are separated in 4 CATEGORIES. 
 	* **ENTROPY_RECURRENCE:** entropy < 0.85 (``filt.recurrence``).
 	* **ENTROPY_ABUNDANCE:** entropy < 0.85 (``filt.abundance``) and at least one individual with > 5 reads supporting the IS (``minReadMax``).

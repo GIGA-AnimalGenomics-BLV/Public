@@ -192,7 +192,7 @@ To find the parameters fitting our dataset we currently use the following proced
 2. Choose one of the parameters (entropy recurrence or filtered).
 3. Order the data by the max(recurrence) or max(filtered-reads) among all the individuals. For instance, max(recurrence):
 
-|IS|Animal_1|Animal_2|Animal_3|MAX|Entropy|
+|IS|Subject_1|Subject_2|Subject_3|MAX|Entropy|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |IS-#1|30|1|0|30|0.2771134|
 |IS-#2|8|1|1|8|0.6390319|

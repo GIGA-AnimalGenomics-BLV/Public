@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-This pipeline is dedicated to the analysis of NGS "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264) and [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260). 
+This pipeline is dedicated to the analysis of NGS "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264), [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260) and [Rosewick *et al.*, 2020](https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2020.587306/full)
 
 Shown below is an example applied to HTLV-1 proviral integration sites.
 
@@ -11,12 +11,13 @@ Shown below is an example applied to HTLV-1 proviral integration sites.
 
 ## PREREQUISITES
 
-* [bowtie](http://bowtie-bio.sourceforge.net/tutorial.shtml) (≥1.1.2)
-* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) (≥2.2.9)
-* [cutadapt](https://cutadapt.readthedocs.io/en/stable/installation.html) (≥1.7.1)
-* [fastx](http://hannonlab.cshl.edu/fastx_toolkit/) (≥0.0.13)
-* [samtools](http://samtools.sourceforge.net/) (≥0.1.19)
-
+* [bbmap](https://archive.jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbmap-guide/) (≥39.13) -> https://biocontainers.pro/tools/bbmap
+* [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) (≥2.5.4) -> https://biocontainers.pro/tools/bowtie2
+* [bowtie](http://bowtie-bio.sourceforge.net/tutorial.shtml) (≥1.3.1) -> https://biocontainers.pro/tools/bowtie
+* [cutadapt](https://cutadapt.readthedocs.io/en/stable/installation.html) (≥5.0) -> https://biocontainers.pro/tools/cutadapt
+* [fastx](http://hannonlab.cshl.edu/fastx_toolkit/) (≥0.0.13) -> https://biocontainers.pro/tools/fastx_toolkit
+* [Picard-Tools](https://broadinstitute.github.io/picard/) (≥1.21) -> https://biocontainers.pro/tools/picard-tools
+* [samtools](http://samtools.sourceforge.net/) (≥1.21) -> https://biocontainers.pro/tools/samtools
 * [R](https://www.r-project.org/) ≥ 3.2.2
   * PIC (1.3)
   * dplyr (≥0.7.6)
@@ -29,7 +30,6 @@ Shown below is an example applied to HTLV-1 proviral integration sites.
   * tidyr (≥0.8)
   * GenomicRanges (≥1.32.2)
   * Rsamtools (≥1.34.1) 
-
 * Scripts contained in the "tools" folder 
   * filterbyname.sh (from the splice-aware global aligner [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/))
   * resynchronizePaired.py
@@ -52,7 +52,7 @@ Before mapping, create an index. Three FASTA files have to be provided:
 * LTR sequences 
 	* LTR sequences 'chromosomes' should be named: ">LTR3" and ">LTR5"
 	* Provide only the sequences starting from the primer 'start' until the LTR extremity.
- 
+
 To annotate the final results a GTF file downloaded from ENSEMBL is also required (i.e., [ensembl FTP](ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/))
 
 #### 1. Create bowtie2 virus-host genome
@@ -314,7 +314,7 @@ fastx_trimmer -Q33 -l 8 -i R2.fastq | fastq_to_fasta -Q33 | fasta_formatter -t |
 ### 7. Extract integration sites and compute clone abundance:
 
 ```
-Rscript run_PIC.R "LTR3_candidateIS_bowtie2_BEST.sorted.bam" "LTR5_candidateIS_bowtie2_BEST.sorted.bam" "LTR3_candidateIS_bowtie2_ALTERN.sorted.bam" "LTR5_candidateIS_bowtie2_ALTERN.sorted.bam" "R2_randomTag.txt" $name $geneBedFile "R1.fastq" $virus 30
+Rscript run_PIC.R "LTR3_candidateIS_bowtie2_BEST.sorted.bam" "LTR5_candidateIS_bowtie2_BEST.sorted.bam" "LTR3_candidateIS_bowtie2_ALTERN.sorted.bam" "LTR5_candidateIS_bowtie2_ALTERN.sorted.bam" "R2_randomTag.txt" $name $geneBedFile "R1.fastq" $virus 30 25
 ```
 
 The run_PIC.R script should contain the following arguments:
@@ -334,7 +334,8 @@ sampleName.args = args[6],
 geneBedFile.args = args[7],
 rawFASTQ.args = args[8],
 virus.args = args[9],
-mapqSTRINGENT = args[10]
+mapqSTRINGENT = args[10],
+winMERGE = args[11]
 )
 ```
 

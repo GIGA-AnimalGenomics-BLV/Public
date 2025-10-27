@@ -7,7 +7,6 @@
 #########################################################
 SingularityDir=<PATH/TO/SINGULARITIES>
 export NXF_SINGULARITY_CACHEDIR=$SingularityDir
-export APPTAINER_BIND="PATH/TO/BIND/TO/SINGULARITIES/"
 
 # 1. Ownmade Tools/binaries path
 ToolsDir=<PATH/TO/TOOLS/DIRECTORY>

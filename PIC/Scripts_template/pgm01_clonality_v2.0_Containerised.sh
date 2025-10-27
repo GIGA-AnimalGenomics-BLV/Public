@@ -80,6 +80,9 @@ module load R/4.2.2-foss-2022b
 # Define Variable
 source $PWD/Config.sh
 
+# Bind Singularity containers
+export APPTAINER_BIND="PATH/TO/BIND/TO/SINGULARITIES/"
+
 # 3. Extract parameters from sampleSheet
 r1=`sed -n "$SLURM_ARRAY_TASK_ID"p $files |  awk -F'\t' 'BEGIN {FS="\t"}; {print $12}' | sed 's/\"//g'` # R1 file
 r2=`sed -n "$SLURM_ARRAY_TASK_ID"p $files |  awk -F'\t' 'BEGIN {FS="\t"}; {print $13}' | sed 's/\"//g'` # R2 file

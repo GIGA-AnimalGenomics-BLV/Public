@@ -11,7 +11,6 @@ Shown below is an example applied to HTLV-1 proviral integration sites.
 
 ## PREREQUISITES
 
-* [bbmap](https://archive.jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbmap-guide/) (≥39.13) -> https://biocontainers.pro/tools/bbmap
 * [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) (≥2.5.4) -> https://biocontainers.pro/tools/bowtie2
 * [bowtie](http://bowtie-bio.sourceforge.net/tutorial.shtml) (≥1.3.1) -> https://biocontainers.pro/tools/bowtie
 * [cutadapt](https://cutadapt.readthedocs.io/en/stable/installation.html) (≥5.0) -> https://biocontainers.pro/tools/cutadapt
@@ -31,13 +30,13 @@ Shown below is an example applied to HTLV-1 proviral integration sites.
   * GenomicRanges (≥1.32.2)
   * Rsamtools (≥1.34.1) 
 * Scripts contained in the "tools" folder 
-  * filterbyname.sh (from the splice-aware global aligner [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/))
+  * filterbyname.sh (from the splice-aware global aligner [bbmap](https://archive.jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbmap-guide/) (≥39.13) -> https://biocontainers.pro/tools/bbmap)
   * resynchronizePaired.py
 
-PIC package is not available on CRAN. It has to be downloaded from this github (R/PIC_1.3.tar.gz). After installing the prerequisites in R, PIC can be installed as follows from the terminal: 
+PIC package is not available on CRAN. It has to be downloaded from this github (R/PIC_1.4.tar.gz). After installing the prerequisites in R, PIC can be installed as follows from the terminal: 
 
 ```
-R CMD INSTALL PIC_1.3.tar.gz
+R CMD INSTALL PIC_1.4.tar.gz
 ```
 
 Specified versions have been tested succesfully. Installation guidelines can be found in INSTALL.

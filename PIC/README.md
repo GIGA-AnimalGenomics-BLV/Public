@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-This pipeline is dedicated to the analysis of NGS "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264), [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260) and [Rosewick *et al.*, 2020](https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2020.587306/full)
+This pipeline is dedicated to the analysis of NGS "clonality" data as described in [Rosewick *et al.*, 2017](https://www.nature.com/articles/ncomms15264), [Artesi *et al.*, 2017](https://www.nature.com/articles/leu2017260), [Rosewick *et al.*, 2020](https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2020.587306/full) and [Karpe *et al.*, 2025](https://www.thelancet.com/journals/lanmic/article/PIIS2666-5247(25)00126-0/fulltext)
 
 Shown below is an example applied to HTLV-1 proviral integration sites.
 
